@@ -152,7 +152,7 @@ Y2 = Y
 
 
 # X cellsize
-cellsizeX = geomatrix[2]
+cellsizeX = geomatrix[1]
 # Y cellsize
 cellsizeY = geomatrix[5]
 
