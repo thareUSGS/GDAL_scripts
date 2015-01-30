@@ -157,10 +157,10 @@ cellsizeX = geomatrix[1]
 cellsizeY = geomatrix[5]
 
 if not (shiftX is None):
-   X2 = X - ( shiftX * cellsizeX)
+   X2 = X + ( shiftX * cellsizeX)
 
 if not (shiftY is None):
-   Y2 = Y + ( shiftY * cellsizeY)
+   Y2 = Y - ( shiftY * cellsizeY)
 
 # Build Spatial Reference object based on coordinate system, fetched from the
 # opened dataset
@@ -198,18 +198,7 @@ outdataset = out_driver.CreateCopy(outfile, indataset)
 outdataset.SetProjection(srs.ExportToWkt())
 outdataset.SetGeoTransform(newGeomatrix)
 
-#simple loop for copying image in to image out - there is probably better method
-#The better was to us "CreateCopy" above
-#loop over bands
-#for iBand in range(1, indataset.RasterCount + 1):
-    #inband = indataset.GetRasterBand(iBand)
-    #outband = outdataset.GetRasterBand(iBand)
+outdataset = None
+indataset = None
+copydataset = None
 
-    #loop over lines
-    #for i in range(inband.YSize - 1, -1, -1):
-        #scanline = inband.ReadAsArray(0, i, inband.XSize, 1, inband.XSize, 1)
-        #outband.WriteArray(scanline, 0, i)
-
-    #update progress line
-    #gdal.TermProgress( 1.0 - (float(i) / inband.YSize) )
-        
