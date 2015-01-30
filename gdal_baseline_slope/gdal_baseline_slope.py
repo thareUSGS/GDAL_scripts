@@ -109,9 +109,9 @@ def ParseNoData(type):
 #
 # Future: need to make filter assignment variable
 
-def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, outNoData):
-    if outNoData in in_filter:
-        return outNoData #will return NoData around edge
+def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, noData):
+    if noData in in_filter:
+        return noData #will return NoData around edge
     else:
         #From 2x2 box, 
         [a, b,
@@ -123,9 +123,9 @@ def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, outNoData):
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
         return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
     
-def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, outNoData):
-    if outNoData in in_filter:
-        return outNoData #will return NoData around edge
+def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, noData):
+    if noData in in_filter:
+        return noData #will return NoData around edge
     else:
         #From 3x3 box, but note we are only using 4 corners in calculation
         #which is why a dummy "z" variable is present
@@ -138,9 +138,9 @@ def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, outNoData):
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
         return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
     
-def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, outNoData):
-    if outNoData in in_filter:
-        return outNoData #will return NoData around edge
+def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, noData):
+    if noData in in_filter:
+        return noData #will return NoData around edge
     else:
         #From 6x6 box, but note we are only using 4 corners in calculation
         #which is why a dummy "z" variable is present
@@ -157,10 +157,10 @@ def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, outNoData):
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
         return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
 
-def calc_slope(in_filter, x_cellsize, y_cellsize, outNoData):
+def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
     #more normal slope calculation here - default if -baseline flag is not sent.
-    if outNoData in in_filter:
-        return outNoData #will return NoData around edge beacuse mode=constant 
+    if noData in in_filter:
+        return noData #will return NoData around edge beacuse mode=constant 
     else:
         #From 3x3 box, 
         [a, b, c,
@@ -180,7 +180,7 @@ argv = gdal.GeneralCmdLineProcessor( sys.argv )
 infile = None
 outfile = None
 baseline = None
-otype = None
+outType = None
 outNoData = None
 quiet = False
 
@@ -196,7 +196,7 @@ while i < len(sys.argv):
         baseline = int(argv[i])
     elif arg == '-ot':
         i = i + 1
-        otype = argv[i]
+        outType = argv[i]
     elif arg == '-q' or arg == '-quiet':
         quiet = True
     elif infile is None:
@@ -221,13 +221,13 @@ indataset = gdal.Open( infile, GA_ReadOnly )
 cols, rows = indataset.RasterXSize, indataset.RasterYSize
 
 #need to read band 1 to get data type (Byte, Int16, etc.)
-type = indataset.GetRasterBand(1).DataType
-if otype:
-   otype = ParseType(type)
-   #set NoData per band below
+inType = indataset.GetRasterBand(1).DataType
+if outType is None:
+   outGdalType = inType
+   outNoData = ParseNoData(outType)
 else:
-   otype = type
-   outNoData = ParseNoData(type)
+   outGdalType = ParseType(outType)
+   #set NoData per band below
 
 # Read geotransform matrix and calculate ground coordinates
 geomatrix = indataset.GetGeoTransform()
@@ -235,18 +235,24 @@ X = geomatrix[0]
 Y = geomatrix[3]
 cellsizeX = geomatrix[1]
 cellsizeY = geomatrix[5]
+# shift amount for baseline = 1 
+X1 = X + (cellsizeX / 2.0)
+Y1 = Y + (cellsizeY / 2.0)
+# shift amount for baseline = 5 
+X5 = X - (cellsizeX / 2.0)
+Y5 = Y - (cellsizeY / 2.0)
 
 #define output format, name, size, type mostly based on input image
 #we are not setting any projection since this a gore image
 out_driver = gdal.GetDriverByName(format)
 outdataset = out_driver.Create(outfile, indataset.RasterXSize, \
-             indataset.RasterYSize, indataset.RasterCount, otype)
+             indataset.RasterYSize, indataset.RasterCount, outGdalType)
 outdataset.SetProjection(indataset.GetProjection())
 
 #loop over bands -- probably can handle all bands at once...
 for band in range (1, indataset.RasterCount + 1):
    iBand = indataset.GetRasterBand(band)
-   if outNoData is None:
+   if outType is None:
       outNoData=iBand.GetNoDataValue()
 
    outband = outdataset.GetRasterBand(band)
@@ -257,7 +263,7 @@ for band in range (1, indataset.RasterCount + 1):
       slope = generic_filter(raster_data, calc_slope_baseline1, size=2, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       #shift half a pixel to center 
-      newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
+      newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
       outdataset.SetGeoTransform(newGeomatrix)
    elif baseline == 2:
       slope = generic_filter(raster_data, calc_slope_baseline2, size=3, mode='constant',
@@ -267,7 +273,7 @@ for band in range (1, indataset.RasterCount + 1):
       slope = generic_filter(raster_data, calc_slope_baseline5, size=6, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       #shift half a pixel to center 
-      newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
+      newGeomatrix = (X5 , geomatrix[1], geomatrix[2], Y5, geomatrix[4], geomatrix[5])
       outdataset.SetGeoTransform(newGeomatrix)
    else:
       slope = generic_filter(raster_data, calc_slope, size=3, mode='constant',
@@ -275,7 +281,7 @@ for band in range (1, indataset.RasterCount + 1):
       outdataset.SetGeoTransform(indataset.GetGeoTransform())
 
    #write out band to new file
-   if type == 'Byte': #if Byte (8bit), scale degrees to 0 to 255).
+   if outType == 'Byte': #if Byte (8bit), scale degrees to 0 to 255).
       slope = np.round((slope * 5) + 0.2)
       outband.SetOffset(0.2)
       outband.SetScale(0.2)
