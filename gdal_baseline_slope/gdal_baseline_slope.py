@@ -10,7 +10,7 @@
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
 #            and scipy slope example from om_henners
-#            http://gis.stackexchange.com/questions/18319/calculating-slope-cell-by-cell-in-arcpy
+#            https://github.com/om-henners/ndimage_talk/blob/master/calculate_slope.py
 # 
 #******************************************************************************
 #  Copyright (c) 2015, Trent Hare
@@ -50,10 +50,9 @@ from scipy.ndimage import generic_filter
 
 # =============================================================================
 # Usage()
-
 def Usage():
     print("""
-Usage: gdal_baseline_slope.py -baseline n -ot outputType infile outfile 
+Usage: gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] infile outfile.tif
 """)
     sys.exit(1)
 
@@ -85,17 +84,38 @@ def ParseType(type):
     else:
         return GDT_Byte
 
+# set up some recommended default nodatavalues for each datatype
+def ParseNoData(type):
+    if type == 'Byte':
+        return 0
+    elif type == 'Int16':
+        return -32768 
+    elif type == 'UInt16':
+        return 0
+    elif type == 'Int32':
+        return -2147483647
+    elif type == 'UInt32':
+        return 0
+    elif type == 'Float32':
+        return -3.402823466E+38
+    elif type == 'Float64':
+        return -1.7976931348623158E+308 
+    else:
+        return 0
+
 # =============================================================================
 # This section contains functions that can be sent to
 # scipy generic_filter function.
+#
+# Future: need to make filter assignment variable
 
 def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, outNoData):
     if outNoData in in_filter:
         return outNoData #will return NoData around edge
     else:
-        [a, b, c, d] = in_filter
-        #From 2x2 box, row 1: a, b
-        #              row 2: c, d
+        #From 2x2 box, 
+        [a, b,
+         c, d] = in_filter
 
         dz_dx = ((b + d) - (a + c)) / (2.0 * float(x_cellsize))
         dz_dy = ((a + b) - (c + d)) / (2.0 * float(y_cellsize))
@@ -108,11 +128,10 @@ def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, outNoData):
         return outNoData #will return NoData around edge
     else:
         #From 3x3 box, but note we are only using 4 corners in calculation
-        #which is why the variables are named out of order
-        [a, q, b, r, s, t, c, u, d] = in_filter
-        #From 3x3 box, row 1: a, q, b
-        #              row 2: r, s, t
-        #              row 3: c, u, d
+        #which is why a dummy "z" variable is present
+        [a, z, b,
+         z, z, z,
+         c, z, d] = in_filter
 
         dz_dx = ((b + d) - (a + c)) / (4.0 * float(x_cellsize))
         dz_dy = ((a + b) - (c + d)) / (4.0 * float(y_cellsize))
@@ -124,13 +143,13 @@ def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, outNoData):
         return outNoData #will return NoData around edge
     else:
         #From 6x6 box, but note we are only using 4 corners in calculation
-        #which is why the variables are named out of order
-        [ a, q1, r1, s1, t1,  b, 
-          g,  h,  i,  j,  k,  l, 
-          m,  n,  o,  p,  q,  r, 
-          s,  t,  u,  v,  w,  x, 
-          y,  z, a1, b1, c1, d1, 
-          c, f1, g1, h1, i1,  d] = in_filter
+        #which is why a dummy "z" variable is present
+        [ a,  z,  z,  z,  z,  b, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          c,  z,  z,  z,  z,  d] = in_filter
          
         dz_dx = ((b + d) - (a + c)) / (10.0 * float(x_cellsize))
         dz_dy = ((a + b) - (c + d)) / (10.0 * float(y_cellsize))
@@ -139,14 +158,14 @@ def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, outNoData):
         return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
 
 def calc_slope(in_filter, x_cellsize, y_cellsize, outNoData):
-    #more normal slope calculation here - default if baseline flag is not sent.
+    #more normal slope calculation here - default if -baseline flag is not sent.
     if outNoData in in_filter:
-        return outNoData #will return NoData around edge with mode constane 
+        return outNoData #will return NoData around edge beacuse mode=constant 
     else:
-        [a, b, c, d, e, f, g, h, i] = in_filter
-        #From 3x3 box, row 1: a, b, c
-        #              row 2: d, e, f
-        #              row 3: g, h, i
+        #From 3x3 box, 
+        [a, b, c,
+         d, e, f,
+         g, h, i] = in_filter
 
         dz_dx = ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * float(x_cellsize))
         dz_dy = ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * float(y_cellsize))
@@ -162,14 +181,11 @@ infile = None
 outfile = None
 baseline = None
 otype = None
+outNoData = None
 quiet = False
 
 #output format currently hardwired to Tiff output
 format = 'GTiff'
-
-# set up some default nodatavalues for each datatype
-NoDataLookup={'Byte':0, 'UInt16':0, 'Int16':-32768, 'UInt32':0, \
-   'Int32':-2147483647, 'Float32':-3.402823466E+38, 'Float64':1.7976931348623158E+308}
 
 # Parse command line arguments.
 i = 1
@@ -178,6 +194,9 @@ while i < len(sys.argv):
     if arg == '-baseline':
         i = i + 1
         baseline = int(argv[i])
+    elif arg == '-ot':
+        i = i + 1
+        otype = argv[i]
     elif arg == '-q' or arg == '-quiet':
         quiet = True
     elif infile is None:
@@ -194,58 +213,52 @@ if  outfile is None:
     Usage()
 if baseline is None:
     baseline = 3
-    print "Warning: baseline defaulting to 3, send -baseline VALUE to set a different value."
+    print "Warning: Using typical slope calculation, send -baseline VALUE [1,2,5] to set specialize calculation."
     
-#Try to open input image
+# =============================================================================
+#Try to open input image, and get metadata
 indataset = gdal.Open( infile, GA_ReadOnly )
+cols, rows = indataset.RasterXSize, indataset.RasterYSize
 
 #need to read band 1 to get data type (Byte, Int16, etc.)
 type = indataset.GetRasterBand(1).DataType
-newType = ParseType(type)
-
-#define output format, name, size, type mostly based on input image
-#we are not setting any projection since this a gore image
-out_driver = gdal.GetDriverByName(format)
-outdataset = out_driver.Create(outfile, indataset.RasterXSize, \
-             indataset.RasterYSize, indataset.RasterCount, type)
-outdataset.SetProjection(indataset.GetProjection())
-
-cols, rows = indataset.RasterXSize, indataset.RasterYSize
+if otype:
+   otype = ParseType(type)
+   #set NoData per band below
+else:
+   otype = type
+   outNoData = ParseNoData(type)
 
 # Read geotransform matrix and calculate ground coordinates
 geomatrix = indataset.GetGeoTransform()
 X = geomatrix[0]
 Y = geomatrix[3]
-
-# X cellsize
 cellsizeX = geomatrix[1]
-# Y cellsize
 cellsizeY = geomatrix[5]
-#if not quiet:
-#   print "cellsize in X,Y: " + str(cellsizeX) +"," + str(cellsizeY)
+
+#define output format, name, size, type mostly based on input image
+#we are not setting any projection since this a gore image
+out_driver = gdal.GetDriverByName(format)
+outdataset = out_driver.Create(outfile, indataset.RasterXSize, \
+             indataset.RasterYSize, indataset.RasterCount, otype)
+outdataset.SetProjection(indataset.GetProjection())
 
 #loop over bands -- probably can handle all bands at once...
 for band in range (1, indataset.RasterCount + 1):
    iBand = indataset.GetRasterBand(band)
-   outNoData=iBand.GetNoDataValue()
+   if outNoData is None:
+      outNoData=iBand.GetNoDataValue()
 
    outband = outdataset.GetRasterBand(band)
    outband.SetNoDataValue(outNoData)
 
-   if not quiet:
-      print ("band: " + str(band) + ", "),
-    
    raster_data = iBand.ReadAsArray(0, 0, cols, rows)
-   #data = iBand.ReadRaster(0, 0, cols, rows, buf_type=gdal.GDT_Float32)
-   #raster_data = np.fromstring(data, dtype=np.float32).reshape(rows, cols)
-
    if baseline == 1:
       slope = generic_filter(raster_data, calc_slope_baseline1, size=2, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       #shift half a pixel to center 
-      #newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
-      #outdataset.SetGeoTransform(newGeomatrix)
-      outdataset.SetGeoTransform(indataset.GetGeoTransform())
+      newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
+      outdataset.SetGeoTransform(newGeomatrix)
    elif baseline == 2:
       slope = generic_filter(raster_data, calc_slope_baseline2, size=3, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
@@ -254,21 +267,27 @@ for band in range (1, indataset.RasterCount + 1):
       slope = generic_filter(raster_data, calc_slope_baseline5, size=6, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       #shift half a pixel to center 
-      #newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
-      #outdataset.SetGeoTransform(newGeomatrix)
-      outdataset.SetGeoTransform(indataset.GetGeoTransform())
+      newGeomatrix = (X + (0.5 * cellsizeX), geomatrix[1], geomatrix[2], Y + (0.5 * cellsizeY), geomatrix[4], geomatrix[5])
+      outdataset.SetGeoTransform(newGeomatrix)
    else:
       slope = generic_filter(raster_data, calc_slope, size=3, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       outdataset.SetGeoTransform(indataset.GetGeoTransform())
 
    #write out band to new file
-   outband.WriteArray(slope)
+   if type == 'Byte': #if Byte (8bit), scale degrees to 0 to 255).
+      slope = np.round((slope * 5) + 0.2)
+      outband.SetOffset(0.2)
+      outband.SetScale(0.2)
+      outband.WriteArray(slope)
+   else:
+      outband.SetOffset(0)
+      outband.SetScale(1)
+      outband.WriteArray(slope)
 
-   #update progress line
-   #if not quiet:
-   #   gdal.TermProgress( 1.0 - (float(band) / indataset.RasterCount ))
-
+   if not quiet:
+      print ("band: " + str(band) + " complete."),
+    
 #set output to None to close file
 outdataset = None
 indataset = None
