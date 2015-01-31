@@ -282,7 +282,7 @@ for band in range (1, indataset.RasterCount + 1):
    #write out band to new file
    if outType == 'Byte': #if Byte (8bit), scale slope degrees to 1 to 255).
       slope_8bit = np.round((slope + 0.2) * 5)
-      slope = slope_8bit.where( a > iBand.GetNoDataValue(), a, 0)
+      slope = np.where( slope_8bit > iBand.GetNoDataValue(), slope_8bit, 0)
       outband.SetOffset(0.2)
       outband.SetScale(0.2)
       outband.SetNoDataValue(outNoData) # should be 0
