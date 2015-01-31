@@ -224,10 +224,10 @@ cols, rows = indataset.RasterXSize, indataset.RasterYSize
 inType = indataset.GetRasterBand(1).DataType
 if outType is None:
    outGdalType = inType
-   outNoData = ParseNoData(outType)
+   #set NoData per band below
 else:
    outGdalType = ParseType(outType)
-   #set NoData per band below
+   outNoData = ParseNoData(outType)
 
 # Read geotransform matrix and calculate ground coordinates
 geomatrix = indataset.GetGeoTransform()
@@ -256,7 +256,6 @@ for band in range (1, indataset.RasterCount + 1):
       outNoData=iBand.GetNoDataValue()
 
    outband = outdataset.GetRasterBand(band)
-   outband.SetNoDataValue(outNoData)
 
    raster_data = iBand.ReadAsArray(0, 0, cols, rows)
    if baseline == 1:
@@ -281,14 +280,17 @@ for band in range (1, indataset.RasterCount + 1):
       outdataset.SetGeoTransform(indataset.GetGeoTransform())
 
    #write out band to new file
-   if outType == 'Byte': #if Byte (8bit), scale degrees to 0 to 255).
-      slope = np.round((slope * 5) + 0.2)
+   if outType == 'Byte': #if Byte (8bit), scale slope degrees to 1 to 255).
+      slope_8bit = np.round((slope + 0.2) * 5)
+      slope = slope_8bit.where( a > iBand.GetNoDataValue(), a, 0)
       outband.SetOffset(0.2)
       outband.SetScale(0.2)
+      outband.SetNoDataValue(outNoData) # should be 0
       outband.WriteArray(slope)
    else:
       outband.SetOffset(0)
       outband.SetScale(1)
+      outband.SetNoDataValue(outNoData)
       outband.WriteArray(slope)
 
    if not quiet:
