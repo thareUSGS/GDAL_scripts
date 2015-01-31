@@ -10,4 +10,4 @@ Usage: python gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] infile outfile
        where [] indicates optional parameters
        warning: current implmentation loads full image into memory and is fairly slow. 
        
-       Future: optionally trim image to clean edges. Currently they are appropriately set to NoDATA. Spped up implementation if possible.
+       Future: optionally trim image to clean-up edges. Currently they are appropriately set to NoDATA. Speed up implementation if possible.
