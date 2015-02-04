@@ -4,8 +4,8 @@
 #  Name:     gdal_baseline_slope.py 
 #  Project:  GDAL Python Interface
 #  Purpose:  Given a DEM, calculate specialized slopes using various baseline
-#            lengths (1 baseline, 2 baseline, 5 baseline). Also a more normal
-#            slope equation is available.
+#            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
+#            Also a more normal slope equation is available.
 #  Author:   Trent Hare, thare@usgs.gov
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
