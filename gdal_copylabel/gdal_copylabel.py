@@ -53,6 +53,9 @@ def Usage():
     print('Example:')
     print('gdal_copylabel.py -of vrt -shiftX 1 -shiftY -1 adir_DEM_1m_InSightE08_E_isis2_02_02_ang.cub DEM_1m_InSightE08_E_isis3.cub adir_DEM_1m_InSightE08_E_isis2_02_02_ang.vrt')
     print('')
+    print('Example:')
+    print('gdal_copylabel.py -of vrt -shiftX 2.5 -shiftY -2.5 adir_DEM_1m_InSightE08_E_isis2_05_05_ang.cub DEM_1m_InSightE08_E_isis3.cub adir_DEM_1m_InSightE08_E_isis2_05_05_ang.vrt')
+    print('')
     sys.exit( 1 )
 
 # =============================================================================

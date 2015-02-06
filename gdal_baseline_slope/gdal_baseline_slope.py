@@ -4,8 +4,8 @@
 #  Name:     gdal_baseline_slope.py 
 #  Project:  GDAL Python Interface
 #  Purpose:  Given a DEM, calculate specialized slopes using various baseline
-#            lengths (1 baseline, 2 baseline, 5 baseline). Also a more normal
-#            slope equation is available.
+#            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
+#            Also a more normal slope equation is available.
 #  Author:   Trent Hare, thare@usgs.gov
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
@@ -235,9 +235,14 @@ X = geomatrix[0]
 Y = geomatrix[3]
 cellsizeX = geomatrix[1]
 cellsizeY = geomatrix[5]
+
 # shift amount for baseline = 1 
-X1 = X + (cellsizeX / 2.0)
-Y1 = Y + (cellsizeY / 2.0)
+X1 = X - (cellsizeX / 2.0)
+Y1 = Y - (cellsizeY / 2.0)
+
+# shift amount for baseline = 2 
+# No shift
+
 # shift amount for baseline = 5 
 X5 = X - (cellsizeX / 2.0)
 Y5 = Y - (cellsizeY / 2.0)
@@ -281,11 +286,11 @@ for band in range (1, indataset.RasterCount + 1):
 
    #write out band to new file
    if outType == 'Byte': #if Byte (8bit), scale slope degrees to 1 to 255).
-      slope_8bit = np.round((slope + 0.2) * 5)
+      slope_8bit = np.round((slope + 0.2) * 5.0)
       slope = np.where( slope_8bit > iBand.GetNoDataValue(), slope_8bit, 0)
       outband.SetOffset(0.2)
       outband.SetScale(0.2)
-      outband.SetNoDataValue(outNoData) # should be 0
+      outband.SetNoDataValue(0) # should be 0
       outband.WriteArray(slope)
    else:
       outband.SetOffset(0)
