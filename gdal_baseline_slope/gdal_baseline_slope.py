@@ -33,6 +33,7 @@
 
 import math
 import sys
+import os
 try:
    from osgeo import gdal
    from osgeo.gdalconst import *
@@ -52,7 +53,7 @@ from scipy.ndimage import generic_filter
 # Usage()
 def Usage():
     print("""
-Usage: gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] infile outfile.tif
+Usage: gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop]  infile outfile.tif
 """)
     sys.exit(1)
 
@@ -107,7 +108,7 @@ def ParseNoData(type):
 # This section contains functions that can be sent to
 # scipy generic_filter function.
 #
-# Future: need to make filter assignment variable
+# Future: make filter assignment variable nt just 1,2, and 5
 
 def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, noData):
     if noData in in_filter:
@@ -136,7 +137,7 @@ def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, noData):
         dz_dx = ((b + d) - (a + c)) / (4.0 * float(x_cellsize))
         dz_dy = ((a + b) - (c + d)) / (4.0 * float(y_cellsize))
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
+        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
     
 def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, noData):
     if noData in in_filter:
@@ -155,7 +156,7 @@ def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, noData):
         dz_dy = ((a + b) - (c + d)) / (10.0 * float(y_cellsize))
 
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
+        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
 
 def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
     #more normal slope calculation here - default if -baseline flag is not sent.
@@ -170,7 +171,7 @@ def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
         dz_dx = ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * float(x_cellsize))
         dz_dy = ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * float(y_cellsize))
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(slope) #we want slope in degrees rather than radians
+        return np.degrees(slope) #return slope in degrees rather than radians
 
 # =============================================================================
 # 	Mainline
@@ -182,6 +183,7 @@ outfile = None
 baseline = None
 outType = None
 outNoData = None
+crop = False
 quiet = False
 
 #output format currently hardwired to Tiff output
@@ -197,6 +199,8 @@ while i < len(sys.argv):
     elif arg == '-ot':
         i = i + 1
         outType = argv[i]
+    elif arg == '-c' or arg == '-crop':
+        crop = True
     elif arg == '-q' or arg == '-quiet':
         quiet = True
     elif infile is None:
@@ -222,12 +226,17 @@ cols, rows = indataset.RasterXSize, indataset.RasterYSize
 
 #need to read band 1 to get data type (Byte, Int16, etc.)
 inType = indataset.GetRasterBand(1).DataType
+
+#Check to see if user spcified Byte (8 bit) output Type
+#The Nodata value is set below
 if outType is None:
    outGdalType = inType
-   #set NoData per band below
 else:
    outGdalType = ParseType(outType)
-   #outNoData = ParseNoData(outType)
+
+if crop:
+   cropfile = outfile
+   outfile = "temp_"+outfile
 
 # Read geotransform matrix and calculate ground coordinates
 geomatrix = indataset.GetGeoTransform()
@@ -248,7 +257,6 @@ X5 = X - (cellsizeX / 2.0)
 Y5 = Y - (cellsizeY / 2.0)
 
 #define output format, name, size, type mostly based on input image
-#we are not setting any projection since this a gore image
 out_driver = gdal.GetDriverByName(format)
 outdataset = out_driver.Create(outfile, indataset.RasterXSize, \
              indataset.RasterYSize, indataset.RasterCount, outGdalType)
@@ -289,19 +297,79 @@ for band in range (1, indataset.RasterCount + 1):
       slope[slope == iBand.GetNoDataValue()] = np.nan
       slope_8bit = np.round((slope + 0.2) * 5.0)
       slope_masked = np.where(np.isnan(slope), 0, slope_8bit)
+      slope=slope_masked.view()
       outband.SetOffset(-0.2)
       outband.SetScale(0.2)
       outband.SetNoDataValue(0) # should be 0
-      outband.WriteArray(slope_masked)
    else:
       outband.SetOffset(0)
       outband.SetScale(1)
       outband.SetNoDataValue(outNoData)
-      outband.WriteArray(slope)
+
+   #write out raster data
+   outband.WriteArray(slope)
+
 
    if not quiet:
       print ("band: " + str(band) + " complete."),
+
+#check to see if user wants to crop, this optional step emulates Randy's code
+#Future: clean up, essentailly an extra step is added which isn't really needed
+if (crop and (baseline != 3)):
+   #define output format, name, size, type mostly based on input image
+   #cropped dimensions are input minus baseline
+   newXSize = outdataset.RasterXSize - baseline
+   newYSize = outdataset.RasterYSize - baseline
+   cropdataset = out_driver.Create(cropfile, newXSize, newYSize, \
+                 outdataset.RasterCount, outGdalType)
+   cropdataset.SetProjection(outdataset.GetProjection())
+   print "cropping file with %d less pixels X=%d, Y=%d" % (baseline, newXSize, newYSize)
+
+   # Read geotransform matrix and calculate ground coordinates
+   geomatrix = outdataset.GetGeoTransform()
+   X = geomatrix[0]
+   Y = geomatrix[3]
+   cellsizeX = geomatrix[1]
+   cellsizeY = geomatrix[5]
+
+   for band in range (1, outdataset.RasterCount + 1):
+      iBand = outdataset.GetRasterBand(band)
+      cropBand = cropdataset.GetRasterBand(band)
+      if baseline == 1:
+         #no shift just removeing pixel from right and bottom
+         #raster_data = iBand.ReadAsArray(0, 0, cols - 1, rows - 1)
+         cropBand.WriteArray(slope[1:,1:])
+	 newGeomatrix = (X , geomatrix[1], geomatrix[2], Y, geomatrix[4], geomatrix[5])
+	 cropdataset.SetGeoTransform(newGeomatrix)
+      elif baseline == 2:
+         #shift 1 pixel in and remove pixel from right/bottom
+         #raster_data = iBand.ReadAsArray(1, 1, cols - 1, rows - 1)
+         cropBand.WriteArray(slope[1:-1,1:-1])
+         X2 = X + cellsizeX
+         Y2 = Y + cellsizeY
+         newGeomatrix = (X2 , geomatrix[1], geomatrix[2], Y2, geomatrix[4], geomatrix[5])
+         cropdataset.SetGeoTransform(newGeomatrix)
+      elif baseline == 5:
+         #shift 2 pixel in and remove 2 pixels from right/bottom
+         #raster_data = iBand.ReadAsArray(2, 2, cols - 3, rows - 3)
+         cropBand.WriteArray(slope[3:-2,3:-2])
+         X5 = X + (cellsizeX * 2)
+         Y5 = Y + (cellsizeY * 2)
+         newGeomatrix = (X5 , geomatrix[1], geomatrix[2], Y5, geomatrix[4], geomatrix[5])
+         cropdataset.SetGeoTransform(newGeomatrix)
+      else:
+         print "This baseline not supported during a crop\n"
+
+      cropBand.SetNoDataValue(iBand.GetNoDataValue())
+      cropBand.SetScale(iBand.GetScale())
+      cropBand.SetOffset(iBand.GetOffset())
+
+   cropdataset = None
+   outdataset = None
+   os.remove(outfile)
     
 #set output to None to close file
+raster_data = None
 outdataset = None
 indataset = None
+
