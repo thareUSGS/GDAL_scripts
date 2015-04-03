@@ -364,7 +364,9 @@ if (crop and (baseline != 3)):
          #no shift just removeing pixel from right and bottom
          #raster_data = iBand.ReadAsArray(0, 0, cols - 1, rows - 1)
          cropBand.WriteArray(slope[1:,1:])
-	 newGeomatrix = (X , geomatrix[1], geomatrix[2], Y, geomatrix[4], geomatrix[5])
+         X1 = X + cellsizeX
+         Y1 = Y + cellsizeY
+	 newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
 	 cropdataset.SetGeoTransform(newGeomatrix)
          if outType == 'Byte': 
             cropBand8.WriteArray(slope_masked[1:,1:])
@@ -384,8 +386,8 @@ if (crop and (baseline != 3)):
          #shift 2 pixel in and remove 2 pixels from right/bottom
          #raster_data = iBand.ReadAsArray(2, 2, cols - 3, rows - 3)
          cropBand.WriteArray(slope[3:-2,3:-2])
-         X5 = X + (cellsizeX * 2)
-         Y5 = Y + (cellsizeY * 2)
+         X5 = X + (cellsizeX * 3)
+         Y5 = Y + (cellsizeY * 3)
          newGeomatrix = (X5 , geomatrix[1], geomatrix[2], Y5, geomatrix[4], geomatrix[5])
          cropdataset.SetGeoTransform(newGeomatrix)
          if outType == 'Byte': 
