@@ -33,6 +33,7 @@
 # ****************************************************************************/
 
 import sys
+import math
 try:
     from osgeo import gdal
     from osgeo import osr
@@ -174,12 +175,15 @@ def main( argv = None ):
         # stddev is negative
         if stats[3] >= 0.0:
             if bStats:
-                  print( "Stored values:  Minimum=%.3f, Maximum=%.3f, Mean=%.3f, StdDev=%.3f" % ( \
-                    (stats[0] * scale) + offset, (stats[1] * scale) + offset,\
-                     (stats[2] * scale) + offset, (stats[3] * scale) + offset ))
+                  mean =  (stats[2] * scale) + offset;
+                  stdev = (stats[3] * scale) + offset;
+                  rms = math.sqrt((mean * mean) + ( stdev * stdev))
+                  print( "Min=%.2f, Max=%.2f, Mean=%.2f, StdDev=%.2f, RMS=%.2f" \
+                    % ((stats[0] * scale) + offset, (stats[1] * scale) + offset,\
+                       mean, stdev, rms ))
 
         if bReportHistograms:
-            print ("level\tvalue\tcount")
+            print ("level\tvalue\tcount\tcumlative")
 
             #Histogram call not returning exact min and max. 
             #...Workaround run gdalinfo -stats and then use min/max from above
@@ -187,6 +191,8 @@ def main( argv = None ):
             hist = hBand.GetDefaultHistogram(force = True)
             #hist = hBand.GetDefaultHistogram(force = True, callback = gdal.TermProgress)
             cnt = 0
+            sum = 0
+            sumTotal = 0
             if hist is not None:
                 #use dfMin and dfMax from previous calls when possible
                 if dfMin is None:
@@ -201,8 +207,14 @@ def main( argv = None ):
                 #print ( "scale: %g, offset: %g" % (scale, offset))
                 increment = (dfMax - dfMin) / nBucketCount
                 value = dfMin
+                #get total to normalize (below)
                 for bucket in panHistogram:
-                    line = "%d\t%0.2f\t%d" % (cnt, value, bucket)
+                    sumTotal = sumTotal + bucket
+                for bucket in panHistogram:
+                    sum = sum + bucket
+                    #normalize cumlative
+                    nsum = sum  / float(sumTotal)
+                    line = "%d\t%0.2f\t%d\t%0.6f" % (cnt, value, bucket, nsum)
                     print(line)
                     cnt = cnt + 1
                     value = value + increment
