@@ -10,7 +10,8 @@ Usage: python gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop] infile
        where [] indicates optional parameters
        warning: current implmentation loads full image into memory and is fairly slow. 
      
-       -ot Byte will scale 32bit floating point values to 8bit using; DN = (Slope * 5) + 0.2  
+       -ot Byte will scale 32bit floating point values to 8bit using; DN = (Slope * 5) + 0.2 
+                 although we will still generated 32bit versions (as requested by team).
        -crop: will trim image 1 to 5 pixels from image edge based on selected baseline amount.
        
        Future: Speed up implementation if possible.
