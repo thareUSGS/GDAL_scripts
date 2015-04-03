@@ -20,9 +20,9 @@
 #_DESC make colorized slope at 1/10 scale with added legend and scalebar.
 #
 #_CALL  List of calls:
-#       gdal_baseline_slope.py, gdaldem, gdalinfo, gdal_hist.py
+#       gdal_baseline_slope.py, gdaldem, gdalinfo, gdal_hist.py, 
+#       slope_histogram_cumlative_graph.py 
 #       composite
-#       gnuplot
 #
 #_HIST
 #       Feb 25 2015 - Trent Hare - original version
@@ -75,8 +75,13 @@
       system($cmd);
 
       #plot histogram
-      $histJpeg  = $root."_adir_".$_."m_hist.jpg";
-      $cmd = "echo 'set terminal jpeg; set output \"$histJpeg\"; set format y \"%.0t*10^%+02T\"; plot \"$hist\" using 2:3 with filledcurve lc rgb \"black\" fs solid 0.7' | gnuplot";
+      $histPng  = $root."_adir_".$_."m_hist.png";
+
+
+      #old gnuplot method
+      #$cmd = "echo 'set terminal unknown; plot \"$hist\" using 2:3; set terminal jpeg; set output \"$histJpeg\"; set format y \"%.1t*10^%+02T\";  set arrow 1 nohead from 15,0 to 15,GPVAL_Y_MAX linewidth 1; set key top right;  set tics out; set tmargin 1; plot \"$hist\" using 2:3 with filledcurve lc rgb \"black\" fs solid 0.5 axes x1y1 title \"slope count\",  \"$hist\" using 2:4 lc rgb \"blue\" axes x1y2 title \"cumlative (0 to 100%)\" ' | gnuplot";
+
+      $cmd = "/usgs/cdev/contrib/bin/slope_histogram_cumlative_graph.py -name \"$root 0$_\" $hist $histPng";
       print $cmd."\n";
       system($cmd);
 
