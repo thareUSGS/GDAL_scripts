@@ -102,12 +102,13 @@ ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax1.get_yaxis().set_tick_params(direction='out')
 
 #get min and max as found by pandas for plotting 'arrow' at X=15
-minY = round(df['count'].min(),0)
-maxY = round(df['count'].max(),0)
+#minY = round(df['count'].min(),0)
+#maxY = round(df['count'].max(),0)
 
 #grab existing ax1 axes
-ax = plt.axes()
-ax.arrow(15, minY, 0, maxY, head_width=0, head_length=0, fc='k', ec='k')
+#ax = plt.axes()
+#ax.arrow(15, minY, 0, maxY, head_width=0, head_length=0, fc='k', ec='k')
+ax1.axvline(x=15, color='black', alpha=0.5)
 
 #add cumlative plot on 'Y2' axis using save X axes
 ax2 = ax1.twinx()
