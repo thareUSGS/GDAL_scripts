@@ -46,7 +46,8 @@ except:
 #/************************************************************************/
 
 def Usage():
-    print( "Usage: gdalhist [-unscale] [-stats] datasetname")
+    print( "Usage: gdalhist [-mm] [-stats] [-hist] [-unscale] datasetname")
+    print( "  Note: at least one flag must be sent")
     return 1
 
 
@@ -59,7 +60,7 @@ def EQUAL(a, b):
 
 def main( argv = None ):
 
-    bReportHistograms = True
+    bReportHistograms = False
     bApproxStats = False
     scale = 1.0
     offset = 0.0
@@ -102,6 +103,8 @@ def main( argv = None ):
             bScale = True
         elif EQUAL(argv[i], "-stats"):
             bStats = True
+        elif EQUAL(argv[i], "-hist"):
+             bReportHistograms = True
         elif argv[i][0] == '-':
             return Usage()
         elif pszFilename is None:
@@ -112,6 +115,8 @@ def main( argv = None ):
         i = i + 1
 
     if pszFilename is None:
+        return Usage()
+    if not (bComputeMinMax or bScale or bStats or bReportHistograms):
         return Usage()
 
 #/* -------------------------------------------------------------------- */
@@ -149,7 +154,7 @@ def main( argv = None ):
         dfMax = hBand.GetMaximum()
         if dfMin is not None or dfMax is not None or bComputeMinMax:
 
-            line =  "  "
+            line =  ""
             if dfMin is not None:
                 dfMin = (dfMin * scale) + offset
                 line = line + ("Min=%.3f " % (dfMin))
@@ -164,6 +169,7 @@ def main( argv = None ):
                   line = line + ( "  Computed Min/Max=%.3f,%.3f" % ( \
                           ((adfCMinMax[0] * scale) + offset), \
                           ((adfCMinMax[1] * scale) + offset) ))
+                  print( line )
 
             #if bStats:
             #   print( line )
@@ -205,7 +211,7 @@ def main( argv = None ):
                 #print( "  %d buckets from %g to %g:" % ( \
                 #        nBucketCount, dfMin, dfMax ))
                 #print ( "scale: %g, offset: %g" % (scale, offset))
-                increment = (dfMax - dfMin) / nBucketCount
+                increment = round(((dfMax - dfMin) / nBucketCount),2)
                 value = dfMin
                 #get total to normalize (below)
                 for bucket in panHistogram:
