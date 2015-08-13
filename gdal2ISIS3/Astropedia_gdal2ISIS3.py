@@ -52,6 +52,7 @@ def Usage(theApp):
     print( '   optional: to print out image information also send -debug')
     print( '   optional: to just get a label *.lbl, send -noimage')
     print( '   optional: to get lonsys=360, send -force360')
+    print( '   optional: to override the center Longitude, send -centerLon 180')
     print( '   optional: to set scaler and offset send -base 17374000 and/or -multiplier 0.5')
     print( 'Usage: Astropedia_gdal2ISIS3.py -debug in.cub output.cub\n') # % theApp)
     print( 'Note: Currently this routine will only work for a limited set of images\n')
@@ -90,6 +91,7 @@ def main( argv = None ):
     bands = 1
     centLat = 0
     centLon = 0
+    centerLon = False
     TMscale = 1.0
     UpperLeftCornerX = 0
     UpperLeftCornerY = 0
@@ -139,6 +141,9 @@ def main( argv = None ):
             debug = True
         elif EQUAL(argv[i], "-force360"):
             force360 = True
+        elif EQUAL(argv[i], "-centerLon"):
+		i = i + 1
+		centerLon = float(argv[i])
         elif EQUAL(argv[i], "-mm"):
             bComputeMinMax = True
         elif EQUAL(argv[i], "-hist"):
@@ -259,6 +264,9 @@ def main( argv = None ):
 
             if (pszProjection[0:6] == "PROJCS"):
                 mapProjection = hSRS.GetAttrValue("PROJECTION",0)
+
+                if EQUAL(mapProjection,"Sinusoidal"):
+                    centLon = hSRS.GetProjParm('central_meridian')
 
                 if EQUAL(mapProjection,"Equirectangular"):
                     centLat = hSRS.GetProjParm('standard_parallel_1')
@@ -487,7 +495,10 @@ def main( argv = None ):
                           hDataset.RasterYSize );
     lry = GDALGetLat( hDataset, hTransform, hDataset.RasterXSize, \
                           hDataset.RasterYSize );
-    
+   
+    if (centerLon):
+       centLon = centerLon
+ 
     #Calculate Simple Cylindrical X,Y in meters from bounds if not projected.
     #Needs testing.                     
     if (pszProjection[0:6] == "GEOGCS"):
@@ -759,19 +770,22 @@ def main( argv = None ):
     f.write('      ByteOrder  = Lsb\n')
     if base is None: 
         f.write('      Base       = %.10g\n' % ( hBand.GetOffset() ))
-        if (hBand.GetOffset() <> 0):
-            print("Warning: a none 0 'base' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this base value: #.10g" % ( hBand.GetOffset() ))
+        if EQUAL(sample_type, "REAL"):
+           if (hBand.GetOffset() <> 0):
+              print("Warning: a none 0 'base' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this base value: %.10g" % ( hBand.GetOffset() ))
     else:
         f.write('      Base       = %.10g\n' % base )
         if EQUAL(sample_type, "REAL"):
             print("Warning: '-base' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this base value.")
     if multiplier is None: 
         f.write('      Multiplier = %.10g\n' % ( hBand.GetScale() ))
-        if (hBand.GetScale() <> 1):
-            print("Warning: a none 1 'multiplier' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this multiplier value: #.10g" % ( hBand.GetScale() ))
+        if EQUAL(sample_type, "REAL"):
+           if (hBand.GetScale() <> 1):
+              print("Warning: a none 1 'multiplier' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this multiplier value: %.10g" % ( hBand.GetScale() ))
     else:
         f.write('      Multiplier = %.10g\n' % multiplier )
         if EQUAL(sample_type, "REAL"):
+           if EQUAL(sample_type, "REAL"):
             print("Warning: '-multiplier' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this multiplier value.")
     f.write('    End_Group\n')
     f.write('  End_Object\n')
