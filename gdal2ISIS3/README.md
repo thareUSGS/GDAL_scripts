@@ -13,10 +13,13 @@ Copyright (c) 1998, Frank Warmerdam
 
 
 Usage: Astropedia_gdal2ISIS3.py in.tif output.cub
-   optional: to print out image information also send -debug
-   optional: to just get a label *.lbl, send -noimage
-   optional: to get lonsys=360, send -force360
-   optional: to override the center Longitude, send -centerLon 180
-   optional: to set scaler and offset send -base 17374000 and/or -multiplier 0.5
+
+*  optional: to print out image information also send -debug
+*   optional: to just get a label *.lbl, send -noimage
+*   optional: to get lonsys=360, send -force360
+*   optional: to override the center Longitude, send -centerLon 180
+*   optional: to set scaler and offset send -base 17374000 and/or -multiplier 0.5
+
 Usage: Astropedia_gdal2ISIS3.py -debug in.cub output.cub
+
 Note: Currently this routine will only work for a limited set of images
