@@ -1,0 +1,20 @@
+<GDAL_WMS>
+  <Service name="WMS">
+    <Version>1.1.1</Version>
+    <ServerUrl>http://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl_elev.map</ServerUrl>
+    <SRS>EPSG:4326</SRS>
+    <ImageFormat>image/tiff</ImageFormat>
+    <Layers>LOLA_elev</Layers>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>175</UpperLeftX>
+    <UpperLeftY>45</UpperLeftY>
+    <LowerRightX>185</LowerRightX>
+    <LowerRightY>35</LowerRightY>
+     <SizeX>1000</SizeX>
+     <SizeY>1000</SizeY>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BandsCount>1</BandsCount>
+  <DataType>Int16</DataType>
+</GDAL_WMS>
