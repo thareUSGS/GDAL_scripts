@@ -13,5 +13,5 @@ and convert:
 
  % PlateVertex2Obj.py ver512q.tab ver512q_3D.obj
  
- For a Python environement I recommend Anaconda.
+ For a Python environment I recommend Anaconda.
  
