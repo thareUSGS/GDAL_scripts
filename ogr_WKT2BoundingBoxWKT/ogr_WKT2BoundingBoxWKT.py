@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Purpose: Given a  WKT geometry, return the extent (4 corners) as a WKT polygon.
+# Author: Trent Hare (USGS)
+# November 4, 2015
+
 import sys
 try:
     from osgeo import gdal
@@ -12,7 +16,7 @@ except:
 #/*                               Usage()                                */
 #/************************************************************************/
 def Usage():
-    print("Usage: ogr2BoundingBoxWKT.py 'MULTIPOLYGON(((x y, x y, x y, x y)))'\n")
+    print("Usage: ogr_WKT2BoundingBoxWKT.py 'MULTIPOLYGON(((x y, x y, x y, x y)))'\n")
     return 1
 
 #/************************************************************************/
@@ -42,8 +46,8 @@ def main( argv ):
    ring.AddPoint(extent[0],extent[2])
    poly = ogr.Geometry(ogr.wkbPolygon)
    poly.AddGeometry(ring)
-   print
-   print poly
+   #print ('Polygon area =',poly.GetArea() )
+   print poly.ExportToWkt()
 
 if __name__ == "__main__":
     main(sys.argv)
