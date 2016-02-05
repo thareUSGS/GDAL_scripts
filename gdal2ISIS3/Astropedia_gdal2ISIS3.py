@@ -35,7 +35,9 @@
 import sys
 import math
 import datetime
-from time import strftime
+import time
+import os
+import subprocess
 try:
     from osgeo import gdal
     from osgeo import osr
@@ -51,6 +53,7 @@ def Usage(theApp):
     print( '\nUsage: Astropedia_gdal2ISIS3.py in.tif output.cub') # % theApp)
     print( '   optional: to print out image information also send -debug')
     print( '   optional: to just get a label *.lbl, send -noimage')
+    print( '   optional: to attach the *.lbl to the ISIS image -attach - requires ISIS3')
     print( '   optional: to get lonsys=360, send -force360')
     print( '   optional: to override the center Longitude, send -centerLon 180')
     print( '   optional: to set scaler and offset send -base 17374000 and/or -multiplier 0.5')
@@ -75,6 +78,7 @@ def main( argv = None ):
     bShowMetadata = False
     bShowRAT=False
     debug = False
+    attach = False
     bStats = False
     bApproxStats = True
     bShowColorTable = True
@@ -139,6 +143,8 @@ def main( argv = None ):
             return 0
         elif EQUAL(argv[i], "-debug"):
             debug = True
+        elif EQUAL(argv[i], "-attach"):
+            attach = True
         elif EQUAL(argv[i], "-force360"):
             force360 = True
         elif EQUAL(argv[i], "-centerLon"):
@@ -206,15 +212,28 @@ def main( argv = None ):
     # Open the output file.
     if dst_cub is not None:
         dst_lbl = dst_cub.replace("CUB","LBL")
-        dst_lbl = dst_cub.replace("cub","lbl")
+        dst_lbl = dst_lbl.replace("cub","lbl")
         dst_hst = dst_cub.replace("CUB","History.IsisCube")
-        dst_hst = dst_cub.replace("cub","History.IsisCube")
+        dst_hst = dst_hst.replace("cub","History.IsisCube")
+        dst_hdr = dst_cub.replace("CUB","hdr")
+        dst_hdr = dst_hdr.replace("cub","hdr")
+        dst_aux = dst_cub.replace("CUB","cub.aux.xml")
+        dst_aux = dst_aux.replace("cub","cub.aux.xml")
+        if attach:
+            attach_cub = dst_cub
+            dst_cub = "XXX"+dst_cub
+            dst_lbl = "XXX"+dst_lbl
+            dst_hst = "XXX"+dst_hst
+            dst_hdr = "XXX"+dst_hdr
+            dst_aux = "XXX"+dst_aux
         if (EQUAL(dst_lbl,dst_cub)):
             print('Extension must be .CUB or .cub - unable to run using filename: %s' % pszFilename )
             sys.exit(1)
         else:
             f = open(dst_lbl,'wt')
             f_hst = open(dst_hst,'wt')
+
+        
 #    else:
 #        f = sys.stdout
 #        dst_cub = "out.cub"
@@ -241,6 +260,7 @@ def main( argv = None ):
     if debug:
         print( "Size is %d, %d" % (hDataset.RasterXSize, hDataset.RasterYSize))
 
+
 #/* -------------------------------------------------------------------- */
 #/*      Report projection.                                              */
 #/* -------------------------------------------------------------------- */
@@ -250,12 +270,23 @@ def main( argv = None ):
         hSRS = osr.SpatialReference()
         if hSRS.ImportFromWkt(pszProjection ) == gdal.CE_None:
             pszPrettyWkt = hSRS.ExportToPrettyWkt(False)
+            if debug:
+                print( "Coordinate System is:\n%s" % pszPrettyWkt )
+        else:
+            if debug:
+                print( "Coordinate System is `%s'" % pszProjection )
+
+
+        hSRS = osr.SpatialReference()
+        if hSRS.ImportFromWkt(pszProjection) == gdal.CE_None:
+            pszPrettyWkt = hSRS.ExportToPrettyWkt(False)
 
             #print( "Coordinate System is:\n%s" % pszPrettyWkt )
             mapProjection = "None"
             #Extract projection information
             target = hSRS.GetAttrValue("DATUM",0)
             target = target.replace("D_","").replace("_2000","").replace("GCS_","")
+
             semiMajor = hSRS.GetSemiMajor() 
             semiMinor = hSRS.GetSemiMinor()
             if (pszProjection[0:6] == "GEOGCS"):
@@ -732,7 +763,12 @@ def main( argv = None ):
     instrList = pszFilename.split("_")
     hBand = hDataset.GetRasterBand( 1 )
     #get the datatype
+    print gdal.GetDataTypeName(hBand.DataType)
     if EQUAL(gdal.GetDataTypeName(hBand.DataType), "Float32"):
+        sample_bits = 32
+        sample_type = "Real"
+        sample_mask = "2#11111111111111111111111111111111#"
+    elif EQUAL(gdal.GetDataTypeName(hBand.DataType), "Float64"):
         sample_bits = 32
         sample_type = "Real"
         sample_mask = "2#11111111111111111111111111111111#"
@@ -785,7 +821,6 @@ def main( argv = None ):
     else:
         f.write('      Multiplier = %.10g\n' % multiplier )
         if EQUAL(sample_type, "REAL"):
-           if EQUAL(sample_type, "REAL"):
             print("Warning: '-multiplier' was set but input is 32bit Float. ISIS will not use this value when type is REAL. Please use 'fx' to apply this multiplier value.")
     f.write('    End_Group\n')
     f.write('  End_Object\n')
@@ -872,7 +907,7 @@ def main( argv = None ):
     f_hst.write('Object = Astropedia_gdal2isis.py\n')
     f_hst.write('  Version           = 0.1\n')
     f_hst.write('  ProgramVersion    = 2013-06-05\n')
-    f_hst.write('  ExecutionDateTime = %s\n' % str(datetime.datetime.now()))
+    f_hst.write('  ExecutionDateTime = %s\n' % str(datetime.datetime.now().isoformat()))
     f_hst.write('  Description        = \"Convert GDAL supported image to an ISIS detached label and raw image\"\n')
     f_hst.write('End_Object\n')
     f_hst.close()
@@ -881,12 +916,25 @@ def main( argv = None ):
     #Export out raw image
     #########################
     #Setup the output dataset
+    print (' - ISIS3 label created:   %s' % dst_lbl)
+    print (' - ISIS3 history created: %s' % dst_hst)
     if bMakeImage:
       print ('Please wait, writing out raw image: %s' % dst_cub)
       driver = gdal.GetDriverByName('ENVI')
       output = driver.CreateCopy(dst_cub, hDataset, 1) 
-    print ('     - ISIS3 history created: %s' % dst_hst)
-    print ('     - ISIS3 label created:   %s' % dst_lbl)
+    if attach:
+      #print 'sleeping 5 seconds'
+      #time.sleep(5)
+      cmd = "/usgs/cdev/contrib/bin/run_cubeatt.sh %s %s" % (dst_lbl, attach_cub)
+      #cmd = "cubeatt from=%s to=%s\n" % (dst_lbl, attach_cub)
+      print cmd
+      #subprocess.call(cmd, shell=True)
+      os.system(cmd)
+      os.remove(dst_cub)
+      os.remove(dst_lbl)
+      os.remove(dst_hst)
+      os.remove(dst_hdr)
+      os.remove(dst_aux)
     print ('Complete')
     
     return 0
