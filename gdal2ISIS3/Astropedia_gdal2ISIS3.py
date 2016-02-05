@@ -898,18 +898,19 @@ def main( argv = None ):
     f.write('  Name           = IsisCube\n')
     f.write('  StartByte      = 1\n')
     #NOT correct
-    f.write('  Bytes          = 256\n')
+    f.write('  Bytes          = 0\n')
     f.write('  ^History       = %s\n' % dst_hst)
     f.write('End_Object\n')
     f.write('End\n')
     f.close()
-    
-    f_hst.write('Object = Astropedia_gdal2isis.py\n')
-    f_hst.write('  Version           = 0.1\n')
-    f_hst.write('  ProgramVersion    = 2013-06-05\n')
-    f_hst.write('  ExecutionDateTime = %s\n' % str(datetime.datetime.now().isoformat()))
-    f_hst.write('  Description        = \"Convert GDAL supported image to an ISIS detached label and raw image\"\n')
-    f_hst.write('End_Object\n')
+   
+    #remove history until we fix the size. This is causing issues with cathist 
+    #f_hst.write('Object = Astropedia_gdal2isis.py\n')
+    #f_hst.write('  Version           = 0.1\n')
+    #f_hst.write('  ProgramVersion    = 2013-06-05\n')
+    #f_hst.write('  ExecutionDateTime = %s\n' % str(datetime.datetime.now().isoformat()))
+    #f_hst.write('  Description        = \"Convert GDAL supported image to an ISIS detached label and raw image\"\n')
+    #f_hst.write('End_Object\n')
     f_hst.close()
 
     #########################
