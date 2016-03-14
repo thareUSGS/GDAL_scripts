@@ -17,6 +17,7 @@ Source directory:
     
     iau2wkt.c is a converted C program to do the same as above. This
     was converted by Yann Chamin for potential addition to GDAL
+    https://github.com/YannChemin/iau2wkt
     
  Feb 2016:
 ---- update to report IAU Mean from reports, 
