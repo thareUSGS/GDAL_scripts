@@ -15,10 +15,9 @@ Source directory:
     It will create a IAU2000 coded system (similar to EPSG codes) for
     planetary bodies.
     
-    iau2wkt.c is a converted C program to do the same as above. This
-    was converted by Yann Chamin for potential addition to GDAL
-    http://github.com/YannChemin/iau2wkt
-    
+    [iau2wkt.c] is a converted C program to do the same as above (http://github.com/YannChemin/iau2wkt).
+    This was converted by Yann Chamin for potential addition to GDAL
+
  Feb 2016:
 ---- update to report IAU Mean from reports, 
 ---- Asteroids and IAU reported Comets,
