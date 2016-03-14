@@ -1,4 +1,4 @@
-Description: 
+**Description: **
     IAU2000_v2.wkt is a tabular Well Known Text (WKT) representation of the
     IAU2000 coded coordinate reference systems (CRS) for planetary bodies
     for use by Open GeospatialConsortium (OGC) web services (e.g. WMS,
@@ -8,28 +8,28 @@ Description:
     The OGC paper, docs\OpenGIS_Project_Document_06-119_Hare.doc, explains
     the proposal for using this WKT projection table.
 
-Source directory:
+**Source directory:**
     create_IAU2000_wkt_v2.py is a Python script creates a IAU2000 WKT
     for Open Geospatial Consortium WMS services from the 
     naifcodes_radii_m_wAsteroids_IAU2000.csv driver file.  
     It will create a IAU2000 coded system (similar to EPSG codes) for
     planetary bodies.
     
-[iau2wkt.c] is a converted C program to do the same as above (http://github.com/YannChemin/iau2wkt).
+iau2wkt.c is a converted C program to do the same as above (http://github.com/YannChemin/iau2wkt).
 This was converted by Yann Chamin for potential addition to GDAL
 
- Feb 2016:
+ **Feb 2016: **
 ---- update to report IAU Mean from reports, 
 ---- Asteroids and IAU reported Comets,
 ---- and two new projections (Mollweide and Robinson)
  
- March 2016:
----- added IAU authority, cleaned code, added refs and updated albers to stndPar_1,2=60,20
+** March 2016: **
+---- added IAU authority, cleaned code (pep8), added refs and updated albers to stndPar_1,2,center_lat=60,20,40
 
 source usage: create_IAU2000_wkt_v2.py naifcodes_radii_m_wAsteroids_IAU2000.csv [output.wtk]
 
-INPUT: (naifcodes_radii_m_wAsteroids_IAU2000.csv or naifcodes_radii_m_wAsteroids_IAU2009.csv)
-Example file format:
+**INPUT: ** (naifcodes_radii_m_wAsteroids_IAU2000.csv or naifcodes_radii_m_wAsteroids_IAU2009.csv)
+**Example file format: **
 Naif_id,Body,IAU2000_Mean,IAU2000_Semimajor,IAU2000_Axisb,IAU2000_Semiminor
 199,Mercury,2439700.00,2439700.00,2439700.00,2439700.00
 299,Venus,6051800.00,6051800.00,6051800.00,6051800.00
@@ -40,8 +40,8 @@ Naif_id,Body,IAU2000_Mean,IAU2000_Semimajor,IAU2000_Axisb,IAU2000_Semiminor
 402,Deimos,6200.00,7500.00,6100.00,5200.00
 
 
-OUTPUT:
-   Example: WMS#,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Decimal_Degree",0.0174532925199433],AUTHORITY["IAU2000","49900"]]
+**OUTPUT Example: **
+49900,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Decimal_Degree",0.0174532925199433],AUTHORITY["IAU2000","49900"]]
 
 
 contact:
