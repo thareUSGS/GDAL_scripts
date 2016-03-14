@@ -23,6 +23,7 @@ Source directory:
 ---- update to report IAU Mean from reports, 
 ---- Asteroids and IAU reported Comets,
 ---- and two new projections (Mollweide and Robinson)
+ 
  March 2016:
 ---- added IAU authority, cleaned code, added refs and updated albers to stndPar_1,2=60,20
 
@@ -41,14 +42,13 @@ Naif_id,Body,IAU2000_Mean,IAU2000_Semimajor,IAU2000_Axisb,IAU2000_Semiminor
 
 
 OUTPUT:
-   Example: WMS#,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Decimal_Degree",0.0174532925199433]]
+   Example: WMS#,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Decimal_Degree",0.0174532925199433],AUTHORITY["IAU2000","49900"]]
 
 
 contact:
 Trent Hare
 Astrogeology, U.S.G.S
 thare@usgs.gov
-928-556-7126
 
 The sources for the constants listed in this file for 2000 and 2009 are:
 
