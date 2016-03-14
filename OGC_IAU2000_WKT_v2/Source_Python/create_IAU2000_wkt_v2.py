@@ -207,36 +207,36 @@ def main(argv):
                     fileToOutput.write(theStr)
 
                     gisCode = theNaifNum * 100 + 22  # Mollweide, ocentric, clon=0
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Mollweide\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 23  # Mollweide, ographic, clon=0
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Mollweide\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 24  # Mollweide, ocentric, clon=180
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Mollweide\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 25  # Mollweide, ocentric, clon=180
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Mollweide\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
 
                     gisCode = theNaifNum * 100 + 26  # Robinson, ocentric, clon=0
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Robinson\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 27  # Robinson, ographic, clon=0
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Robinson\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 28  # Robinson, ocentric, clon=180
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Robinson\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
                     gisCode = theNaifNum * 100 + 29  # Robinson, ocentric, clon=180
-                    theStr = "%r,PROJCS[\"%s_Sinusoidal\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
+                    theStr = "%r,PROJCS[\"%s_Robinson\",\"GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433]],PROJECTION[\"Robinson\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",180],UNIT[\"Meter\",1],AUTHORITY[\"IAU%s\",\"%r\"]]\n" % (
                         gisCode, theTarget, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
 
