@@ -23,7 +23,7 @@ This was converted by Yann Chamin for potential addition to GDAL
 ---- Asteroids and IAU reported Comets,
 ---- and two new projections (Mollweide and Robinson)
  
-** March 2016:**
+**March 2016:**
 ---- added IAU authority, cleaned code (pep8), added refs and updated albers to stndPar_1,2,center_lat=60,20,40
 
 source usage: create_IAU2000_wkt_v2.py naifcodes_radii_m_wAsteroids_IAU2000.csv [output.wtk]
