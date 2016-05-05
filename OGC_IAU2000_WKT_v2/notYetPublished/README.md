@@ -1,12 +1,12 @@
 **Description:**
-   These preliminary definitions not yet approved by the IAU. Once the next publication to be dated "2015" is still in the process of publication by the IAU.
+   These preliminary definitions not yet approved by the IAU. These assume the next IAU publication will be dated "2015" and the radius values will be the same. The ETA for the IAU 2015 publication is still unknown.
 
 contact:
 Trent Hare
 Astrogeology, U.S.G.S
 thare@usgs.gov
 
-The sources for the constants listed in this file for 2000 and 2009 are:
+As of May 2016, here are the current IAU publications for 2009 and the 2000 reference:
 
         [1]   Seidelmann, P.K., Abalakin, V.K., Bursa, M., Davies, M.E.,
               Bergh, C. de, Lieske, J.H., Oberst, J., Simon, J.L.,
