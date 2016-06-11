@@ -22,12 +22,12 @@ I currently create a .csvt for the type of fields but I'm not sure if the type o
 To run in batch:
 
  tcsh 
-    -- if not running a csh/tcsh
+       if not running a csh/tcsh
 foreach i (*.csv)
 foreach? /usgs/cdev/contrib/bin/isisminer2shp.py $i /usgs/shareall/thare/projections/Enceladus_2009.prj
 foreach? end
 
---You will got lots of field mapping warning (copy the last run into a text file). The *.vrt(s) can now be deleted.  Shapefiles will have a *.shp, *.dbf, *.shx, and *.prj (at a minimum). Load the *.shp into ArcMap or QGIS. 
+note: you will get lots of field map warnings (copy the last run into a text file so you know the original name). The *.vrt(s) can now be deleted.  Shapefiles will have a *.shp, *.dbf, *.shx, and *.prj (at a minimum). Load the *.shp into ArcMap or QGIS. 
 
 To merge them all into one shapefile.
 foreach i (*.shp)
