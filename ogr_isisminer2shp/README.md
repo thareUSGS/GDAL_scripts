@@ -8,8 +8,9 @@ The projection information is retained if prj file is sent. Column names will be
 Usage: isisminer2shp.py <input.csv> {projection.prj}
  --projection is optional but recommended.
 
-Many projection definitions can be found. Replace the space in the filename with an underscore before running:
+Many projection definitions can be found here:
 ftp://pdsimage2.wr.usgs.gov/pub/pigpen/ArcMap_addons/Solar%20System/
+note: replace the space in the filename with an underscore before running.
 
 NOTES AND WARNINGS
 
