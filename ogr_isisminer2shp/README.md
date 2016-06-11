@@ -23,13 +23,18 @@ To run in batch:
 
  tcsh 
        if not running a csh/tcsh
+       
 foreach i (*.csv)
+
 foreach? /usgs/cdev/contrib/bin/isisminer2shp.py $i /usgs/shareall/thare/projections/Enceladus_2009.prj
+
 foreach? end
 
 note: you will get lots of field map warnings (copy the last run into a text file so you know the original name). The *.vrt(s) can now be deleted.  Shapefiles will have a *.shp, *.dbf, *.shx, and *.prj (at a minimum). Load the *.shp into ArcMap or QGIS. 
 
 To merge them all into one shapefile.
 foreach i (*.shp)
+
 foreach? ogr2ogr -update -append 00_merged.shp -f "ESRI Shapefile" $i
+
 foreach? end
