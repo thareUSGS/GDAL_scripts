@@ -25,7 +25,7 @@ To run in batch:
 tcsh 
        if not running a csh/tcsh
 foreach i (*.csv)
-foreach? /usgs/cdev/contrib/bin/isisminer2shp.py $i /usgs/shareall/thare/projections/Enceladus_2009.prj
+foreach? ./isisminer2shp.py $i Enceladus_2009.prj
 foreach? end
 ```
 
