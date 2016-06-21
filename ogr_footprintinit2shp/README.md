@@ -25,9 +25,11 @@ NOTES AND WARNINGS
 
 Note: This code requires Python library PVL: https://pypi.python.org/pypi/pvl
 If you are runnning from Anaconda Python you may also need to install pip
+```
 $ conda install pip
 and now that pip is intalled you can get pvl.
 $ pip install pvl
+```
 
 Warning: Unfortunately the older GIS vector format shapfile doesn't like long field names. When the conversion runs, ogr2ogr will automatically map the long fields into a short field names. Just copy the mapping down (if you need the long names). QGIS likes GML too but the projection isn't carried over...? ogr2ogr supports several database formats too but then you have to set that up first before loading. Anyway, use shapefile for now.
 
