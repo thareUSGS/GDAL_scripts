@@ -59,11 +59,11 @@ The sources for the constants listed in this file for 2000 and 2009 are:
               Satellites: 2000," Celestial Mechanics and Dynamical
               Astronomy, v.82, Issue 1, pp. 83-111.
 
-        [2]   Archinal, B. A., M. F. A¦Hearn, E. Bowell, A. Conrad,
+        [2]   Archinal, B. A., M. F. AÂ¦Hearn, E. Bowell, A. Conrad,
                G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer,
                J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst,
                P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas,
                I. P. Williams (2011), "Report of the IAU/IAG Working Group
               on Cartographic Coordinates and Rotational Elements of the
-              Planets and Satellites: 2011," Celestial Mechanics and Dynamical
+              Planets and Satellites: 2009," Celestial Mechanics and Dynamical
               Astronomy, v.109, Issue 2, pp. 101-135.
