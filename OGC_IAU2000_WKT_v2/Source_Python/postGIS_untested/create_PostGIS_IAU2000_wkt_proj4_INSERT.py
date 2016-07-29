@@ -10,6 +10,8 @@
 #---- and two new projections (Mollweide and Robinson)
 # March 2016:
 #---- added IAU authority, cleaned code, added refs and updated albers to stndPar_1,2=60,20
+# July 2016:
+#---- changed Decimal_Degree to just Degree
 #
 #  Description: This Python script creates a IAU2000 Proj4 for PostGIS services
 #
@@ -29,7 +31,7 @@
 #...
 #
 # OUTPUT:
-#   WMS Example: ,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Decimal_Degree",0.0174532925199433],AUTHORITY["IAU2000","49900"]]
+#   WMS Example: ,GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0],UNIT["Degree",0.0174532925199433],AUTHORITY["IAU2000","49900"]]
 #   Proj 4 Example: +proj=longlat +a=3396190 +b=3376200 +no_defs
 #
 #------------------------------------------------------------------------------
@@ -155,7 +157,7 @@ def main(argv):
                     fileToOutput.write(theStr)
 
                     # WKT
-                    theStr = "%r,GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Decimal_Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]," % (
+                    theStr = "%r,GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]," % (
                         gisCode, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
 
