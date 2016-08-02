@@ -22,5 +22,5 @@ As of May 2016, here are the current IAU publications for 2009 and the 2000 refe
                P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas,
                I. P. Williams (2011), "Report of the IAU/IAG Working Group
               on Cartographic Coordinates and Rotational Elements of the
-              Planets and Satellites: 2011," Celestial Mechanics and Dynamical
+              Planets and Satellites: 2009," Celestial Mechanics and Dynamical
               Astronomy, v.109, Issue 2, pp. 101-135.
