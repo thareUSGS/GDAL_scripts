@@ -26,3 +26,8 @@ Usage: Astropedia_gdal2ISIS3.py in.tif output.cub
 Usage: Astropedia_gdal2ISIS3.py -debug in.cub output.cub
 
 Note: Currently this routine will only work for a limited set of images
+
+------------
+
+Aug 3, 2016, Added related LMMP_gdal2PDS.py as a very simple (brute-force) script to 
+maybe help convert from GDAL to PDS3 images and labels.
