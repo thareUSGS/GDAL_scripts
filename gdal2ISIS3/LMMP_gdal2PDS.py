@@ -87,6 +87,8 @@ def main( argv = None ):
     dst_img = None
     dst_lbl = None
     bands = 1
+    centLat = None
+    centLon = None
 
     #/* Must process GDAL_SKIP before GDALAllRegister(), but we can't call */
     #/* GDALGeneralCmdLineProcessor before it needs the drivers to be registered */
@@ -699,10 +701,11 @@ def main( argv = None ):
     else:
         f.write('PRODUCT_VERSION_ID        = "%s"\n' % "V1.0")
     f.write('PRODUCT_TYPE              = "RDR"\n')
-    f.write('INSTRUMENT_HOST_NAME      = "%s"\n' % instrList[0])
-    f.write('INSTRUMENT_HOST_ID        = "%s"\n' % instrList[0])
-    f.write('INSTRUMENT_NAME           = "%s"\n' % instrList[1])
-    f.write('INSTRUMENT_ID             = "%s"\n' % instrList[1])
+    if len(instrList) > 1:
+        f.write('INSTRUMENT_HOST_NAME      = "%s"\n' % instrList[0])
+        f.write('INSTRUMENT_HOST_ID        = "%s"\n' % instrList[0])
+        f.write('INSTRUMENT_NAME           = "%s"\n' % instrList[1])
+        f.write('INSTRUMENT_ID             = "%s"\n' % instrList[1])
     f.write('TARGET_NAME               = MOON\n')
     f.write('MISSION_PHASE_NAME        = "POST MISSION"\n')
     f.write('RATIONALE_DESC            = "Created at the request of NASA\'s Exploration\n')
@@ -731,8 +734,10 @@ def main( argv = None ):
     f.write('    /* NOTE:  CENTER_LATITUDE and CENTER_LONGITUDE describe the location   */\n')
     f.write('    /* of the center of projection, which is not necessarily equal to the  */\n')
     f.write('    /* location of the center point of the image.                          */\n')
-    f.write('    CENTER_LATITUDE              = %5.2f <DEG>\n' % centLat)
-    f.write('    CENTER_LONGITUDE             = %5.2f <DEG>\n' % centLon)
+    if (centLat != None):
+        f.write('    CENTER_LATITUDE              = %5.2f <DEG>\n' % centLat)
+    if (centLon != None):
+        f.write('    CENTER_LONGITUDE             = %5.2f <DEG>\n' % centLon)
     f.write('    LINE_FIRST_PIXEL             = 1\n')
     f.write('    LINE_LAST_PIXEL              = %d\n' % hDataset.RasterYSize)
     f.write('    SAMPLE_FIRST_PIXEL           = 1\n')
