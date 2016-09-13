@@ -13,6 +13,8 @@
 # July 2016:
 #---- changed Decimal_Degree to just Degree
 #---- change script to write out individual *.prj files.
+# Sep 2016:
+#---- removed comma at end
 #
 #  Description: This Python script creates a IAU2000/2009 WKT projection strings for WMS services
 #
@@ -58,8 +60,7 @@ def isInt(string):
 
 
 def main(argv):
-    usage = "usage: python %s naifcodes_radii_m_wAsteroids_IAU2000.csv [output.proj4] " % os.path.basename(sys.argv[
-                                                                                                           0])
+    usage = "usage: python %s naifcodes_radii_m_wAsteroids_IAU2000.csv" % os.path.basename(sys.argv[0])
 
     if len(sys.argv) < 2:
         print usage
@@ -150,7 +151,7 @@ def main(argv):
                     print "writing %s" % (outputPrjFile)
 
                     # WKT
-                    theStr = "GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]," % (
+                    theStr = "GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]" % ( 
                         theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
 
