@@ -50,9 +50,8 @@ GEOGCS["Mars 2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,16
 Using gdal tools (w/ curl installed for web access) you can use these projections directly to assign projections to images or vectors or to use for re-projection. For example:
 
 $ gdalwarp -t_srs "http://raw.githubusercontent.com/USGS-Astrogeology/GDAL_scripts/master/OGC_IAU2000_WKT_v2/IAU2000_prjs/Moon%202000.prj" my_moonMap.img out_moonMap_inDegrees.tif
-Note you need to point to the "raw" address from github. Also you can substitue "https" to "http" 
 
-to test you can also run (remember gdal must be built with curl):
+Note you need to point to the "raw" address from github. Also you can substitue "https" to "http" . To test you can also run gdalsrsinfo (remember gdal must be built with curl):
 
 $ gdalsrsinfo http://raw.githubusercontent.com/USGS-Astrogeology/GDAL_scripts/master/OGC_IAU2000_WKT_v2/IAU2000_prjs/Moon%202000.prj
 
