@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WMS example - Leaflet</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+	<style>
+		#map {
+			width: 600px;
+			height: 400px;
+		}
+	</style>
+</head>
+<body>
+<div id='map'></div>
+<script type="text/javascript">
+	var map = L.map('map', {
+                    crs: L.CRS.EPSG4326,
+		center: [0, 0],
+		zoom: 1
+	});
+
+	var wmsLayer = L.tileLayer.wms('https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map', {
+		layers: 'LROC_WAC'
+	}).addTo(map);
+
+           // include GeoJSON inside this JavaScript
+           var pubextent = {"features": [{"geometry": {"coordinates": [[[50, 22.5], [50, 27.5], [60, 27.5], [60, 22.5], [50, 22.5]]], "type": "Polygon"}, "properties": {}, "type": "Feature"}], "properties": {"title": "Example polygon"}, "type": "FeatureCollection"};
+           L.geoJson( pubextent ).addTo(map);
+
+
+</script>
+</body>
+</html>
