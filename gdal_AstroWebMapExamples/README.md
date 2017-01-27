@@ -9,4 +9,4 @@ Example configuration xml file for gdal to retrieve images from a WMS layer
 OpenLayers_MyMoon.html is an openlayers example using our planetary add-ons and our hosted WMS layers as listed here:
 http://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html
 
-OpenLayers_MyMoon.html host on a server: http://webgis.wr.usgs.gov/ogc/OpenLayers_MyMoon.html
+Download OpenLayers_MyMoon.html or Leaflet_moonWMS_wGeoJSON_Box.html to run locally
