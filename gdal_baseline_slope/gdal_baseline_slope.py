@@ -5,7 +5,7 @@
 #  Project:  GDAL Python Interface
 #  Purpose:  Given a DEM, calculate specialized slopes using various baseline
 #            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
-#            Also a more normal slope equation is available.
+#            Also a more normal slope equation (Horn's Method) is available.
 #  Author:   Trent Hare, thare@usgs.gov
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
@@ -159,7 +159,8 @@ def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, noData):
         return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
 
 def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
-    #more normal slope calculation here - default if -baseline flag is not sent.
+    # Use Horn's Method for slope calculation here - default if -baseline flag is not sent.
+    # This is equivalent to the commandline utility 'gdaldem slope'
     if noData in in_filter:
         return noData #will return NoData around edge beacuse mode=constant 
     else:
@@ -171,7 +172,7 @@ def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
         dz_dx = ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * float(x_cellsize))
         dz_dy = ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * float(y_cellsize))
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(slope) #return slope in degrees rather than radians
+        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
 
 # =============================================================================
 # 	Mainline
@@ -217,7 +218,7 @@ if  outfile is None:
     Usage()
 if baseline is None:
     baseline = 3
-    print "Warning: Using typical slope calculation, send -baseline VALUE [1,2,5] to set specialize calculation."
+    print ("Warning: Using Horn's method for slope calculation, send -baseline VALUE [1,2,5] to set specialized calculation.")
     
 # =============================================================================
 #Try to open input image, and get metadata
@@ -321,10 +322,13 @@ for band in range (1, indataset.RasterCount + 1):
    #write out raster data
    if outType == 'Byte': #if Byte (8bit), scale slope degrees to 1 to 255).
       slope[slope == iBand.GetNoDataValue()] = np.nan
-      slope_8bit = np.round((slope + 0.2) * 5.0)
+      # slope_8bit = np.round((slope + 0.2) * 5.0)
+      slope_8bit = np.round((slope * 254.0/90) + 1)
       slope_masked = np.where(np.isnan(slope), 0, slope_8bit)
-      outband8.SetOffset(-0.2)
-      outband8.SetScale(0.2)
+      # outband8.SetOffset(-0.2)
+      # outband8.SetScale(0.2)
+      outband8.SetOffset(-0.3543307086614173)
+      outband8.SetScale(0.3543307086614173)
       outband8.SetNoDataValue(0) # should be 0
       outband8.WriteArray(slope_masked)
 
