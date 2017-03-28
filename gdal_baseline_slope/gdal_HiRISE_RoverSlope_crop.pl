@@ -21,7 +21,7 @@
 #
 #_CALL  List of calls:
 #       gdal_baseline_slope.py, gdaldem, gdalinfo, gdal_hist.py, 
-#       slope_histogram_cumlative_graph.py 
+#       slope_histogram_cumulative_graph.py 
 #       composite
 #
 #_HIST
@@ -98,12 +98,12 @@
 
       #plot histogram using Python's matplotlib
       $histPng  = $root."_adir_".$_."m_hist.png";
-      $cmd = "/usgs/cdev/contrib/bin/slope_histogram_cumlative_graph.py -name \"$root 0$_\" $hist $histPng";
+      $cmd = "/usgs/cdev/contrib/bin/slope_histogram_cumulative_graph.py -name \"$root 0$_\" $hist $histPng";
       print $cmd."\n";
       system($cmd);
 
       #old gnuplot method
-      #$cmd = "echo 'set terminal unknown; plot \"$hist\" using 2:3; set terminal jpeg; set output \"$histJpeg\"; set format y \"%.1t*10^%+02T\";  set arrow 1 nohead from 15,0 to 15,GPVAL_Y_MAX linewidth 1; set key top right;  set tics out; set tmargin 1; plot \"$hist\" using 2:3 with filledcurve lc rgb \"black\" fs solid 0.5 axes x1y1 title \"slope count\",  \"$hist\" using 2:4 lc rgb \"blue\" axes x1y2 title \"cumlative (0 to 100%)\" ' | gnuplot";
+      #$cmd = "echo 'set terminal unknown; plot \"$hist\" using 2:3; set terminal jpeg; set output \"$histJpeg\"; set format y \"%.1t*10^%+02T\";  set arrow 1 nohead from 15,0 to 15,GPVAL_Y_MAX linewidth 1; set key top right;  set tics out; set tmargin 1; plot \"$hist\" using 2:3 with filledcurve lc rgb \"black\" fs solid 0.5 axes x1y1 title \"slope count\",  \"$hist\" using 2:4 lc rgb \"blue\" axes x1y2 title \"cumulative (0 to 100%)\" ' | gnuplot";
 
   
       #resample to 10m/p using an average method for down-sampling

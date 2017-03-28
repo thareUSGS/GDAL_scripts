@@ -189,7 +189,7 @@ def main( argv = None ):
                        mean, stdev, rms ))
 
         if bReportHistograms:
-            print ("level\tvalue\tcount\tcumlative")
+            print ("level\tvalue\tcount\tcumulative")
 
             #Histogram call not returning exact min and max. 
             #...Workaround run gdalinfo -stats and then use min/max from above
@@ -218,7 +218,7 @@ def main( argv = None ):
                     sumTotal = sumTotal + bucket
                 for bucket in panHistogram:
                     sum = sum + bucket
-                    #normalize cumlative
+                    #normalize cumulative
                     nsum = sum  / float(sumTotal)
                     line = "%d\t%0.2f\t%d\t%0.6f" % (cnt, value, bucket, nsum)
                     print(line)
