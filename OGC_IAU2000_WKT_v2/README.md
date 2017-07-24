@@ -29,6 +29,10 @@ This was converted by Yann Chamin for potential addition to GDAL
 **July 2016:**
 ---- changed "Decimal_Degree" to just "Degree"
 
+**July 2017:**
+---- updated to support -1 (NoData) in naifcodes_radii_m_wAsteroids_IAUxxxx.csv
+---- updated to Python 3 (not much changed since such a simple script)
+
 source usage: create_IAU2000_wkt_v2.py naifcodes_radii_m_wAsteroids_IAU2000.csv [output.wtk]
 
 **INPUT:** (naifcodes_radii_m_wAsteroids_IAU2000.csv or naifcodes_radii_m_wAsteroids_IAU2009.csv)
