@@ -15,6 +15,8 @@
 #---- change script to write out individual *.prj files.
 # Sep 2016:
 #---- removed comma at end
+#July 2017:
+#---- Updated for Python v3 and support for -1 NoData values in table
 #
 #  Description: This Python script creates a IAU2000/2009 WKT projection strings for WMS services
 #
@@ -46,9 +48,6 @@
 
 import os
 import sys
-import math
-import string
-
 
 def isInt(string):
     is_int = 1
@@ -63,7 +62,7 @@ def main(argv):
     usage = "usage: python %s naifcodes_radii_m_wAsteroids_IAU2000.csv" % os.path.basename(sys.argv[0])
 
     if len(sys.argv) < 2:
-        print usage
+        print(usage)
     else:
         inputTable = sys.argv[1]
         # This sets the default to stdout if no file name is passed in.
@@ -72,8 +71,8 @@ def main(argv):
         # grab year from file name
         theYear = sys.argv[1].split('IAU')[1].split('.')[0]
         if not isInt(theYear):
-            print "Can't parse the year from filename: " + sysargv[2]
-            print usage
+            print("Can't parse the year from filename: " + sys.argv[2])
+            print(usage)
             sys.exit()
 
         #References - block of text for start of files
@@ -115,12 +114,13 @@ def main(argv):
         #elif (theYear == "2009"):
         #    fileToOutput.write(refs2009)
         #else:
-        #    print "Warning: No reference for the this year: " + theYear
+        #    print("Warning: No reference for the this year: " + theYear)
 
         for line in open(inputTable):
             tokens = line.split(',')
             # Then Radii values exist in input table
-            if tokens[2].replace(" ", "") != "":
+            if (tokens[2].replace(" ", "") != "") \
+                and (tokens[2].replace(" ", "") != "-1"):
                 if isInt(tokens[0]):  # is Naif number?
                     theNaifNum = int(tokens[0])
                     theTarget = tokens[1]
@@ -137,9 +137,8 @@ def main(argv):
 
                     flattening = ((theA - theC) / theA)
                     output = "%i"
-                    if flattening <> 0:
+                    if (flattening != 0):
                         flattening = 1 / flattening
-                        output = "%.13f"
 
                     #Even = Areocentric
                     #Odd = Areographic
@@ -148,7 +147,7 @@ def main(argv):
 
                     outputPrjFile = "%s %s.prj" % (theTarget, theYear)
                     fileToOutput = open(outputPrjFile, 'w')
-                    print "writing %s" % (outputPrjFile)
+                    print("writing %s" % (outputPrjFile))
 
                     # WKT
                     theStr = "GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]" % ( 

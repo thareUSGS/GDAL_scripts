@@ -12,6 +12,8 @@
 #---- added IAU authority, cleaned code, added refs and updated albers to stndPar_1,2=60,20
 # July 2016:
 #---- changed Decimal_Degree to just Degree
+#July 2017:
+#---- Updated for Python v3 and support for -1 NoData values in table
 #
 #  Description: This Python script creates a IAU2000 Proj4 for PostGIS services
 #
@@ -40,9 +42,6 @@
 
 import os
 import sys
-import math
-import string
-
 
 def isInt(string):
     is_int = 1
@@ -58,7 +57,7 @@ def main(argv):
                                                                                                            0])
 
     if len(sys.argv) < 2:
-        print usage
+        print(usage)
     else:
         inputTable = sys.argv[1]
         # This sets the default to stdout if no file name is passed in.
@@ -67,13 +66,13 @@ def main(argv):
         # grab year from file name
         theYear = sys.argv[1].split('IAU')[1].split('.')[0]
         if not isInt(theYear):
-            print "Can't parse the year from filename: " + sysargv[2]
-            print usage
+            print("Can't parse the year from filename: " + sys.argv[2])
+            print(usage)
             sys.exit()
 
         if len(sys.argv) > 2:
             fileToOutput = open(sys.argv[2], 'w')
-            print "outfile = %s" % (sys.argv[2])
+            print ("outfile = %s" % (sys.argv[2]))
 
         #References - block of text for start of files
         refs2000 = """#IAU2000 WKT Codes
@@ -100,10 +99,10 @@ def main(argv):
 #     The sources for the constants listed in this file are:
 #
 #        [1]   Archinal, B. A., M. F. A'Hearn, E. Bowell, A. Conrad, 
-#               G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer, 
-#               J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst, 
-#               P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas, 
-#               I. P. Williams (2011), "Report of the IAU/IAG Working Group
+#              G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer, 
+#              J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst, 
+#              P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas, 
+#              I. P. Williams (2011), "Report of the IAU/IAG Working Group
 #              on Cartographic Coordinates and Rotational Elements of the 
 #              Planets and Satellites: 2011," Celestial Mechanics and Dynamical
 #              Astronomy, v.109, Issue 2, pp. 101-135.
@@ -119,7 +118,8 @@ def main(argv):
         for line in open(inputTable):
             tokens = line.split(',')
             # Then Radii values exist in input table
-            if tokens[2].replace(" ", "") != "":
+            if (tokens[2].replace(" ", "") != "") \
+                and (tokens[2].replace(" ", "") != "-1"):
                 if isInt(tokens[0]):  # is Naif number?
                     theNaifNum = int(tokens[0])
                     theTarget = tokens[1]
@@ -135,10 +135,8 @@ def main(argv):
                         theC = theMean
 
                     flattening = ((theA - theC) / theA)
-                    output = "%i"
-                    if flattening <> 0:
+                    if (flattening != 0):
                         flattening = 1 / flattening
-                        output = "%.13f"
 
                     #Even = Areocentric
                     #Odd = Areographic
