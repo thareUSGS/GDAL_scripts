@@ -7,6 +7,7 @@
 #            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
 #            Also a more normal slope equation is available.
 #  Author:   Trent Hare, thare@usgs.gov
+# *             updated to Python 3, August 2017
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
 #            and scipy slope example from om_henners
@@ -31,16 +32,13 @@
 #  DEALINGS IN THE SOFTWARE.
 #******************************************************************************
 
-import math
-import sys
 import os
+import sys
 try:
    from osgeo import gdal
-   from osgeo.gdalconst import *
    gdal.TermProgress = gdal.TermProgress_nocb
 except ImportError:
     import gdal
-    from gdalconst import *
 
 try:
     import numpy as np
@@ -61,29 +59,29 @@ Usage: gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop]  infile outfi
 # convert string to GDAL Type enumeration
 def ParseType(type):
     if type == 'Byte':
-        return GDT_Byte
+        return gdal.GDT_Byte
     elif type == 'Int16':
-        return GDT_Int16
+        return gdal.GDT_Int16
     elif type == 'UInt16':
-        return GDT_UInt16
+        return gdal.GDT_UInt16
     elif type == 'Int32':
-        return GDT_Int32
+        return gdal.GDT_Int32
     elif type == 'UInt32':
-        return GDT_UInt32
+        return gdal.GDT_UInt32
     elif type == 'Float32':
-        return GDT_Float32
+        return gdal.GDT_Float32
     elif type == 'Float64':
-        return GDT_Float64
+        return gdal.GDT_Float64
     elif type == 'CInt16':
-        return GDT_CInt16
+        return gdal.GDT_CInt16
     elif type == 'CInt32':
-        return GDT_CInt32
+        return gdal.GDT_CInt32
     elif type == 'CFloat32':
-        return GDT_CFloat32
+        return gdal.GDT_CFloat32
     elif type == 'CFloat64':
-        return GDT_CFloat64
+        return gdal.GDT_CFloat64
     else:
-        return GDT_Byte
+        return gdal.GDT_Byte
 
 # set up some recommended default nodatavalues for each datatype
 def ParseNoData(type):
@@ -171,7 +169,7 @@ def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
         dz_dx = ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * float(x_cellsize))
         dz_dy = ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * float(y_cellsize))
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(slope) #return slope in degrees rather than radians
+        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
 
 # =============================================================================
 # 	Mainline
@@ -217,11 +215,11 @@ if  outfile is None:
     Usage()
 if baseline is None:
     baseline = 3
-    print "Warning: Using typical slope calculation, send -baseline VALUE [1,2,5] to set specialize calculation."
+    print("Warning: Using typical slope calculation, send -baseline VALUE [1,2,5] to set specialize calculation.")
     
 # =============================================================================
 #Try to open input image, and get metadata
-indataset = gdal.Open( infile, GA_ReadOnly )
+indataset = gdal.Open( infile, gdal.GA_ReadOnly )
 cols, rows = indataset.RasterXSize, indataset.RasterYSize
 
 #need to read band 1 to get data type (Byte, Int16, etc.)
@@ -329,7 +327,7 @@ for band in range (1, indataset.RasterCount + 1):
       outband8.WriteArray(slope_masked)
 
    if not quiet:
-      print ("band: " + str(band) + " complete."),
+      print(("band: " + str(band) + " complete."), end=' ')
 
 #check to see if user wants to crop, this optional step emulates Randy's code
 #Future: clean up, essentailly an extra step is added which isn't really needed
@@ -345,7 +343,7 @@ if (crop and (baseline != 3)):
       cropdataset8 = out_driver.Create(cropfile8, newXSize, newYSize, \
                  outdataset.RasterCount, outGdalType)
       cropdataset8.SetProjection(outdataset.GetProjection())
-   print "cropping file with %d less pixels X=%d, Y=%d" % (baseline, newXSize, newYSize)
+   print("cropping file with %d less pixels X=%d, Y=%d" % (baseline, newXSize, newYSize))
 
    # Read geotransform matrix and calculate ground coordinates
    geomatrix = outdataset.GetGeoTransform()
@@ -366,11 +364,11 @@ if (crop and (baseline != 3)):
          cropBand.WriteArray(slope[1:,1:])
          X1 = X + cellsizeX
          Y1 = Y + cellsizeY
-	 newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
-	 cropdataset.SetGeoTransform(newGeomatrix)
+         newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
+         cropdataset.SetGeoTransform(newGeomatrix)
          if outType == 'Byte': 
             cropBand8.WriteArray(slope_masked[1:,1:])
-	    cropdataset8.SetGeoTransform(newGeomatrix)
+            cropdataset8.SetGeoTransform(newGeomatrix)
       elif baseline == 2:
          #shift 1 pixel in and remove pixel from right/bottom
          #raster_data = iBand.ReadAsArray(1, 1, cols - 1, rows - 1)
@@ -394,7 +392,7 @@ if (crop and (baseline != 3)):
             cropBand8.WriteArray(slope_masked[3:-2,3:-2])
             cropdataset8.SetGeoTransform(newGeomatrix)
       else:
-         print "This baseline not supported during a crop\n"
+         print("This baseline not supported during a crop\n")
 
       cropBand.SetNoDataValue(iBand.GetNoDataValue())
       cropBand.SetScale(iBand.GetScale())

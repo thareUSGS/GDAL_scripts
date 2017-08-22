@@ -5,6 +5,7 @@
 # * Project:  GDAL Histogram
 # * Purpose:  Export an image histogram in xls format
 # * Author:   Trent Hare, thare@usgs.gov
+# *             updated to Python 3, August 2017
 # *   based on code by Even Rouault, <even dot rouault at mines dash paris dot org>
 # *
 # * Port from gdalinfo.c whose author is Frank Warmerdam
@@ -36,10 +37,8 @@ import sys
 import math
 try:
     from osgeo import gdal
-    from osgeo import osr
 except:
     import gdal
-    import osr
 
 #/************************************************************************/
 #/*                               Usage()                                */
@@ -64,19 +63,10 @@ def main( argv = None ):
     bApproxStats = False
     scale = 1.0
     offset = 0.0
-
     bComputeMinMax = False
-    bSample = False
-    bShowGCPs = True
-    bShowMetadata = True
-    bShowRAT=True
     bStats = False
     bScale = False
-    bShowColorTable = True
     pszFilename = None
-    papszExtraMDDomains = [ ]
-    pszProjection = None
-    hTransform = None
 
     if argv is None:
         argv = sys.argv
@@ -94,8 +84,8 @@ def main( argv = None ):
     while i < nArgc:
 
         if EQUAL(argv[i], "--utility_version"):
-            print("%s is running against GDAL %s" %
-                   (argv[0], gdal.VersionInfo("RELEASE_NAME")))
+            print(("%s is running against GDAL %s" %
+                   (argv[0], gdal.VersionInfo("RELEASE_NAME"))))
             return 0
         elif EQUAL(argv[i], "-mm"):
             bComputeMinMax = True
@@ -125,7 +115,7 @@ def main( argv = None ):
     hDataset = gdal.Open( pszFilename, gdal.GA_ReadOnly )
 
     if hDataset is None:
-        print("gdalinfo failed - unable to open '%s'." % pszFilename )
+        print(("gdalinfo failed - unable to open '%s'." % pszFilename ))
         return 1
     
 #/* ==================================================================== */
@@ -144,11 +134,11 @@ def main( argv = None ):
                   scale = 1.0
 
         if (hDataset.RasterCount > 1):
-           print( "Band %d Block=%dx%d Type=%s, ColorInterp=%s" % ( iBand+1, \
+           print(( "Band %d Block=%dx%d Type=%s, ColorInterp=%s" % ( iBand+1, \
                 nBlockXSize, nBlockYSize, \
                 gdal.GetDataTypeName(hBand.DataType), \
                 gdal.GetColorInterpretationName( \
-                hBand.GetRasterColorInterpretation()) ))
+                hBand.GetRasterColorInterpretation()) )))
 
         dfMin = hBand.GetMinimum()
         dfMax = hBand.GetMaximum()
@@ -184,9 +174,9 @@ def main( argv = None ):
                   mean =  (stats[2] * scale) + offset;
                   stdev = (stats[3] * scale) + offset;
                   rms = math.sqrt((mean * mean) + ( stdev * stdev))
-                  print( "Min=%.2f, Max=%.2f, Mean=%.2f, StdDev=%.2f, RMS=%.2f" \
+                  print(( "Min=%.2f, Max=%.2f, Mean=%.2f, StdDev=%.2f, RMS=%.2f" \
                     % ((stats[0] * scale) + offset, (stats[1] * scale) + offset,\
-                       mean, stdev, rms ))
+                       mean, stdev, rms )))
 
         if bReportHistograms:
             print ("level\tvalue\tcount\tcumulative")
