@@ -3,6 +3,9 @@ Purpose:  Given a DEM, calculate specialized slopes using various baseline
            lengths (1 baseline, 2 baseline, 5 baseline). Also a more normal (3x3 Horn method)
            slope equation is available which is used if no baseline parameter is sent.
 
+updates:
+         T. Hare - August 2017. Upgraded to Python3.x
+
 Install: Recommended environment is Anacoda Python. To get GDAL added to Anacoda run "conda install gdal". Requires GDAL, Numpy, and SciPy.
 
 Usage: python gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop] infile outfile.tif
