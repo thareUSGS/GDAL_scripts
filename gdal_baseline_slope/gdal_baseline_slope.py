@@ -5,7 +5,7 @@
 #  Project:  GDAL Python Interface
 #  Purpose:  Given a DEM, calculate specialized slopes using various baseline
 #            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
-#            Also a more normal slope equation is available.
+#            The more commonly-used Horn's Method is also available.
 #  Author:   Trent Hare, thare@usgs.gov
 # *             updated to Python 3, August 2017
 #  Credits:  Based on python GDAL samples 
@@ -109,6 +109,8 @@ def ParseNoData(type):
 # Future: make filter assignment variable nt just 1,2, and 5
 
 def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, noData):
+    # Use Horn's Method for slope calculation here - default if -baseline flag is not sent.
+    # This is equivalent to the commandline utility 'gdaldem slope'
     if noData in in_filter:
         return noData #will return NoData around edge
     else:
@@ -319,6 +321,7 @@ for band in range (1, indataset.RasterCount + 1):
    #write out raster data
    if outType == 'Byte': #if Byte (8bit), scale slope degrees to 1 to 255).
       slope[slope == iBand.GetNoDataValue()] = np.nan
+      #NOTE: The choice of scale factor and offset below deliberately maps slopes >50 degrees to 255
       slope_8bit = np.round((slope + 0.2) * 5.0)
       slope_masked = np.where(np.isnan(slope), 0, slope_8bit)
       outband8.SetOffset(-0.2)
