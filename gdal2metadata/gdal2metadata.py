@@ -116,9 +116,12 @@ def main( argv = None ):
 
     if argv is None:
         argv = sys.argv
+
     argv = gdal.GeneralCmdLineProcessor( argv )
+
     if argv is None:
         return 1
+
     nArgc = len(argv)
 
 #/* -------------------------------------------------------------------- */
@@ -128,8 +131,8 @@ def main( argv = None ):
     while i < nArgc:
 
         if EQUAL(argv[i], "--utility_version"):
-            print("%s is running against GDAL %s" %
-                   (argv[0], gdal.VersionInfo("RELEASE_NAME")))
+            print(("%s is running against GDAL %s" %
+                   (argv[0], gdal.VersionInfo("RELEASE_NAME"))))
             return 0
         elif EQUAL(argv[i], "-debug"):
             debug = True
@@ -185,7 +188,7 @@ def main( argv = None ):
     hDataset = gdal.Open( pszFilename, gdal.GA_ReadOnly )
 
     if hDataset is None:
-        print("gdalinfo failed - unable to open '%s'." % pszFilename )
+        print(("gdalinfo failed - unable to open '%s'." % pszFilename ))
         sys.exit(1)
 
 #/* -------------------------------------------------------------------- */
@@ -206,22 +209,22 @@ def main( argv = None ):
 #/* -------------------------------------------------------------------- */
     hDriver = hDataset.GetDriver();
     if debug:
-        print( "Driver: %s/%s" % ( \
+        print(( "Driver: %s/%s" % ( \
                 hDriver.ShortName, \
-                hDriver.LongName ))
+                hDriver.LongName )))
 
     papszFileList = hDataset.GetFileList();
     if papszFileList is None or len(papszFileList) == 0:
         print( "Files: none associated" )
     else:
         if debug:
-            print( "Files: %s" % papszFileList[0] )
+            print(( "Files: %s" % papszFileList[0] ))
             if bShowFileList:
                 for i in range(1, len(papszFileList)):
-                    print( "       %s" % papszFileList[i] )
+                    print(( "       %s" % papszFileList[i] ))
 
     if debug:
-        print( "Size is %d, %d" % (hDataset.RasterXSize, hDataset.RasterYSize))
+        print(( "Size is %d, %d" % (hDataset.RasterXSize, hDataset.RasterYSize)))
 
 #/* -------------------------------------------------------------------- */
 #/*      Report projection.                                              */
@@ -232,12 +235,18 @@ def main( argv = None ):
         hSRS = osr.SpatialReference()
         if hSRS.ImportFromWkt(pszProjection ) == gdal.CE_None:
             pszPrettyWkt = hSRS.ExportToPrettyWkt(False)
+
+            #print( "Coordinate System is:\n%s" % pszPrettyWkt )
             mapProjection = "None"
             #Extract projection information
             target = hSRS.GetAttrValue("DATUM",0).replace("D_","").replace("_2000","")
             semiMajor = hSRS.GetSemiMajor() #/ 1000.0
             semiMinor = hSRS.GetSemiMinor() #/ 1000.0
             invFlat = hSRS.GetInvFlattening()
+            # the USGS tool MP doesn't like 0 for the invFlat so we are putting a giant number to represent a sphere
+            if (invFlat < 0.1):
+               invFlat = 1.0e+10
+
             if (pszProjection[0:6] == "GEOGCS"):
                 mapProjection = "SIMPLE_CYLINDRICAL"
                 centLat = 0
@@ -273,9 +282,7 @@ def main( argv = None ):
                     #for fnorth in equirect.getiterator('fnorth'):
                     fnorth = etree.SubElement(equirect, 'fnorth')
                     fnorth.text = str(hSRS.GetProjParm('false_northing'))
-                        
-                # Change to building projection XML section instead of replace   
-                # Change to merc instead of transmer
+                            
                 if EQUAL(mapProjection,"Mercator"):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Mercator"
@@ -297,7 +304,6 @@ def main( argv = None ):
                         for fnorth in merc.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
                 
-                # Change to building projection XML section instead of replace   
                 if EQUAL(mapProjection,"Orthographic "):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Orthographic"
@@ -313,7 +319,6 @@ def main( argv = None ):
                         for fnorth in orthogr.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
-                # Change to building projection XML section instead of replace   
                 if EQUAL(mapProjection,"Stereographic"):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Stereographic"
@@ -329,7 +334,6 @@ def main( argv = None ):
                         for fnorth in stereo.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
-                # Change to building projection XML section instead of replace   
                 if EQUAL(mapProjection,"Sinusoidal"):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Sinusoidal"
@@ -345,7 +349,6 @@ def main( argv = None ):
                         for fnorth in sinusoid.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
-                # Change to building projection XML section instead of replace   
                 if EQUAL(mapProjection,"Robinson"):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Robinson"
@@ -361,7 +364,6 @@ def main( argv = None ):
                         for fnorth in robinson.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
-                # Change to building projection XML section instead of replace   
                 if (EQUAL(mapProjection,"Polar_Stereographic") or EQUAL(mapProjection,"Stereographic_North_Pole") or EQUAL(mapProjection,"Stereographic_South_Pole")):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Polar Stereographic"
@@ -380,7 +382,6 @@ def main( argv = None ):
                         for fnorth in polarst.getiterator('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
-                # Change to building projection XML section instead of replace   
                 if EQUAL(mapProjection,"Transverse_Mercator"):
                     for mapprojn in tree.getiterator('mapprojn'):
                         mapprojn.text = "Transverse Mercator"
@@ -410,10 +411,10 @@ def main( argv = None ):
                 plandu = etree.SubElement(planci, 'plandu')
 
             if debug:
-                print( "Coordinate System is:\n%s" % pszPrettyWkt )
+                print(( "Coordinate System is:\n%s" % pszPrettyWkt ))
         else:
             print( "Warning - Can't parse this type of projection\n" )
-            print( "Coordinate System is `%s'" % pszProjection )
+            print(( "Coordinate System is `%s'" % pszProjection ))
             sys.exit(1)
     else:
         print( "Warning - No Coordinate System defined:\n" )
@@ -427,15 +428,15 @@ def main( argv = None ):
 
         if adfGeoTransform[2] == 0.0 and adfGeoTransform[4] == 0.0:
             if debug:
-                print( "Origin = (%.15f,%.15f)" % ( \
-                        adfGeoTransform[0], adfGeoTransform[3] ))
+                print(( "Origin = (%.15f,%.15f)" % ( \
+                        adfGeoTransform[0], adfGeoTransform[3] )))
 
-                print( "Pixel Size = (%.15f,%.15f)" % ( \
-                        adfGeoTransform[1], adfGeoTransform[5] ))
+                print(( "Pixel Size = (%.15f,%.15f)" % ( \
+                        adfGeoTransform[1], adfGeoTransform[5] )))
 
         else:
             if debug:
-                print( "GeoTransform =\n" \
+                print(( "GeoTransform =\n" \
                         "  %.16g, %.16g, %.16g\n" \
                         "  %.16g, %.16g, %.16g" % ( \
                         adfGeoTransform[0], \
@@ -443,19 +444,19 @@ def main( argv = None ):
                         adfGeoTransform[2], \
                         adfGeoTransform[3], \
                         adfGeoTransform[4], \
-                        adfGeoTransform[5] ))
+                        adfGeoTransform[5] )))
 
         if (pszProjection[0:6] == "GEOGCS"):
             #convert degrees/pixel to km/pixel 
              mapres = 1 / adfGeoTransform[1]
              lonres = adfGeoTransform[1]
              latres = adfGeoTransform[5]
-             kmres = adfGeoTransform[1] * (semiMajor * math.pi / 180.0) / 1000.0
+             kmres = adfGeoTransform[1] * (semiMajor * math.pi / 180.0)
         else:
             #convert m/pixel to pixel/degree
-             mapres = 1 / (adfGeoTransform[1] / (semiMajor * math.pi / 180.0))
-             lonres = adfGeoTransform[1] / (semiMajor * math.pi / 180.0)
-             latres = adfGeoTransform[5] / (semiMajor * math.pi / 180.0)
+             mapres = 1 / (adfGeoTransform[1] / (semiMajor * 1000.0 * math.pi / 180.0))
+             lonres = adfGeoTransform[1] / (semiMajor * 1000.0 * math.pi / 180.0)
+             latres = adfGeoTransform[5] / (semiMajor * 1000.0 * math.pi / 180.0)
              xres = adfGeoTransform[1]
              yres = adfGeoTransform[5]
              kmres = adfGeoTransform[1] / 1000.0
@@ -472,23 +473,23 @@ def main( argv = None ):
             if hSRS.ImportFromWkt(pszProjection ) == gdal.CE_None:
                 pszPrettyWkt = hSRS.ExportToPrettyWkt(False)
                 if debug:
-                    print( "GCP Projection = \n%s" % pszPrettyWkt )
+                    print(( "GCP Projection = \n%s" % pszPrettyWkt ))
 
             else:
                 if debug:
-                    print( "GCP Projection = %s" % \
-                            pszProjection )
+                    print(( "GCP Projection = %s" % \
+                            pszProjection ))
 
         gcps = hDataset.GetGCPs()
         i = 0
         for gcp in gcps:
 
             if debug:
-                print( "GCP[%3d]: Id=%s, Info=%s\n" \
+                print(( "GCP[%3d]: Id=%s, Info=%s\n" \
                         "          (%.15g,%.15g) -> (%.15g,%.15g,%.15g)" % ( \
                         i, gcp.Id, gcp.Info, \
                         gcp.GCPPixel, gcp.GCPLine, \
-                        gcp.GCPX, gcp.GCPY, gcp.GCPZ ))
+                        gcp.GCPX, gcp.GCPY, gcp.GCPZ )))
             i = i + 1
 
 #/* -------------------------------------------------------------------- */
@@ -502,15 +503,15 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "Metadata:" )
             for metadata in papszMetadata:
-                print( "  %s" % metadata )
+                print(( "  %s" % metadata ))
 
         if bShowMetadata:
             for extra_domain in papszExtraMDDomains:
                 papszMetadata = hDataset.GetMetadata_List(extra_domain)
                 if papszMetadata is not None and len(papszMetadata) > 0 :
-                    print( "Metadata (%s):" % extra_domain)
+                    print(( "Metadata (%s):" % extra_domain))
                     for metadata in papszMetadata:
-                      print( "  %s" % metadata )
+                      print(( "  %s" % metadata ))
 
 #/* -------------------------------------------------------------------- */
 #/*      Report "IMAGE_STRUCTURE" metadata.                              */
@@ -522,7 +523,7 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "Image Structure Metadata:" )
             for metadata in papszMetadata:
-                print( "  %s" % metadata )
+                print(( "  %s" % metadata ))
 
 #/* -------------------------------------------------------------------- */
 #/*      Report subdatasets.                                             */
@@ -531,7 +532,7 @@ def main( argv = None ):
         if papszMetadata is not None and len(papszMetadata) > 0 :
             print( "Subdatasets:" )
             for metadata in papszMetadata:
-                print( "  %s" % metadata )
+                print(( "  %s" % metadata ))
 
 #/* -------------------------------------------------------------------- */
 #/*      Report geolocation.                                             */
@@ -543,7 +544,7 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "Geolocation:" )
             for metadata in papszMetadata:
-                print( "  %s" % metadata )
+                print(( "  %s" % metadata ))
 
 #/* -------------------------------------------------------------------- */
 #/*      Report RPCs                                                     */
@@ -555,7 +556,7 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "RPC Metadata:" )
             for metadata in papszMetadata:
-                print( "  %s" % metadata )
+                print(( "  %s" % metadata ))
 
 #/* -------------------------------------------------------------------- */
 #/*      Setup projected to lat/long transform if appropriate.           */
@@ -597,6 +598,12 @@ def main( argv = None ):
                           hDataset.RasterYSize );
     lry = GDALGetLat( hDataset, hTransform, hDataset.RasterXSize, \
                           hDataset.RasterYSize );
+       
+    #FGDC metadata requires -180 to 180 to pass validation (not 0 to 360).                   
+    if (lrx > 179.99):
+       lrx = lrx - 360   
+    if (ulx > 179.99):
+       ulx = ulx - 360
 
 #/* ==================================================================== */
 #/*      Loop over bands.                                                */
@@ -606,16 +613,26 @@ def main( argv = None ):
         for iBand in range(hDataset.RasterCount):
 
                 hBand = hDataset.GetRasterBand(iBand+1 )
+
+                #if( bSample )
+                #{
+                #    float afSample[10000];
+                #    int   nCount;
+                #
+                #    nCount = GDALGetRandomRasterSample( hBand, 10000, afSample );
+                #    print( "Got %d samples.\n", nCount );
+                #}
+
                 (nBlockXSize, nBlockYSize) = hBand.GetBlockSize()
-                print( "Band %d Block=%dx%d Type=%s, ColorInterp=%s" % ( iBand+1, \
+                print(( "Band %d Block=%dx%d Type=%s, ColorInterp=%s" % ( iBand+1, \
                                 nBlockXSize, nBlockYSize, \
                                 gdal.GetDataTypeName(hBand.DataType), \
                                 gdal.GetColorInterpretationName( \
-                                        hBand.GetRasterColorInterpretation()) ))
+                                        hBand.GetRasterColorInterpretation()) )))
 
                 if hBand.GetDescription() is not None \
                         and len(hBand.GetDescription()) > 0 :
-                        print( "  Description = %s" % hBand.GetDescription() )
+                        print(( "  Description = %s" % hBand.GetDescription() ))
 
                 dfMin = hBand.GetMinimum()
                 dfMax = hBand.GetMaximum()
@@ -640,8 +657,8 @@ def main( argv = None ):
                 # Dirty hack to recognize if stats are valid. If invalid, the returned
                 # stddev is negative
                 if stats[3] >= 0.0:
-                        print( "  Minimum=%.3f, Maximum=%.3f, Mean=%.3f, StdDev=%.3f" % ( \
-                                        stats[0], stats[1], stats[2], stats[3] ))
+                        print(( "  Minimum=%.3f, Maximum=%.3f, Mean=%.3f, StdDev=%.3f" % ( \
+                                        stats[0], stats[1], stats[2], stats[3] )))
 
                 if bReportHistograms:
 
@@ -652,8 +669,8 @@ def main( argv = None ):
                                 nBucketCount = hist[2]
                                 panHistogram = hist[3]
 
-                                print( "  %d buckets from %g to %g:" % ( \
-                                                nBucketCount, dfMin, dfMax ))
+                                print(( "  %d buckets from %g to %g:" % ( \
+                                                nBucketCount, dfMin, dfMax )))
                                 line = '  '
                                 for bucket in panHistogram:
                                         line = line + ("%d " % bucket)
@@ -661,14 +678,14 @@ def main( argv = None ):
                                 print(line)
 
                 if bComputeChecksum:
-                        print( "  Checksum=%d" % hBand.Checksum())
+                        print(( "  Checksum=%d" % hBand.Checksum()))
 
                 dfNoData = hBand.GetNoDataValue()
                 if dfNoData is not None:
                         if dfNoData != dfNoData:
                                 print( "  NoData Value=nan" )
                         else:
-                                print( "  NoData Value=%.18g" % dfNoData )
+                                print(( "  NoData Value=%.18g" % dfNoData ))
 
                 if hBand.GetOverviewCount() > 0:
 
@@ -746,7 +763,7 @@ def main( argv = None ):
                                                 line = line + "(null)"
 
                 if len(hBand.GetUnitType()) > 0:
-                        print( "  Unit Type: %s" % hBand.GetUnitType())
+                        print(( "  Unit Type: %s" % hBand.GetUnitType()))
 
                 papszCategories = hBand.GetRasterCategoryNames()
                 if papszCategories is not None:
@@ -754,12 +771,12 @@ def main( argv = None ):
                         print( "  Categories:" );
                         i = 0
                         for category in papszCategories:
-                                print( "    %3d: %s" % (i, category) )
+                                print(( "    %3d: %s" % (i, category) ))
                                 i = i + 1
 
                 if hBand.GetScale() != 1.0 or hBand.GetOffset() != 0.0:
-                        print( "  Offset: %.15g,   Scale:%.15g" % \
-                                                ( hBand.GetOffset(), hBand.GetScale()))
+                        print(( "  Offset: %.15g,   Scale:%.15g" % \
+                                                ( hBand.GetOffset(), hBand.GetScale())))
 
                 if bShowMetadata:
                         papszMetadata = hBand.GetMetadata_List()
@@ -768,7 +785,7 @@ def main( argv = None ):
                 if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
                         print( "  Metadata:" )
                         for metadata in papszMetadata:
-                                print( "    %s" % metadata )
+                                print(( "    %s" % metadata ))
 
 
                 if bShowMetadata:
@@ -778,28 +795,28 @@ def main( argv = None ):
                 if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
                         print( "  Image Structure Metadata:" )
                         for metadata in papszMetadata:
-                                print( "    %s" % metadata )
+                                print(( "    %s" % metadata ))
 
 
                 hTable = hBand.GetRasterColorTable()
                 if hBand.GetRasterColorInterpretation() == gdal.GCI_PaletteIndex  \
                         and hTable is not None:
 
-                        print( "  Color Table (%s with %d entries)" % (\
+                        print(( "  Color Table (%s with %d entries)" % (\
                                         gdal.GetPaletteInterpretationName( \
                                                 hTable.GetPaletteInterpretation(  )), \
-                                        hTable.GetCount() ))
+                                        hTable.GetCount() )))
 
                         if bShowColorTable:
 
                                 for i in range(hTable.GetCount()):
                                         sEntry = hTable.GetColorEntry(i)
-                                        print( "  %3d: %d,%d,%d,%d" % ( \
+                                        print(( "  %3d: %d,%d,%d,%d" % ( \
                                                         i, \
                                                         sEntry[0],\
                                                         sEntry[1],\
                                                         sEntry[2],\
-                                                        sEntry[3] ))
+                                                        sEntry[3] )))
 
                 if bShowRAT:
                         hRAT = hBand.GetDefaultRAT()
@@ -849,7 +866,7 @@ def main( argv = None ):
                         line = line + "(null)"
 
         if len(hBand.GetUnitType()) > 0:
-            print( "  Unit Type: %s" % hBand.GetUnitType())
+            print(( "  Unit Type: %s" % hBand.GetUnitType()))
 
         papszCategories = hBand.GetRasterCategoryNames()
         if papszCategories is not None:
@@ -857,12 +874,12 @@ def main( argv = None ):
             print( "  Categories:" );
             i = 0
             for category in papszCategories:
-                print( "    %3d: %s" % (i, category) )
+                print(( "    %3d: %s" % (i, category) ))
                 i = i + 1
 
         if hBand.GetScale() != 1.0 or hBand.GetOffset() != 0.0:
-            print( "  Offset: %.15g,   Scale:%.15g" % \
-                        ( hBand.GetOffset(), hBand.GetScale()))
+            print(( "  Offset: %.15g,   Scale:%.15g" % \
+                        ( hBand.GetOffset(), hBand.GetScale())))
 
         if bShowMetadata:
             papszMetadata = hBand.GetMetadata_List()
@@ -871,7 +888,7 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "  Metadata:" )
             for metadata in papszMetadata:
-                print( "    %s" % metadata )
+                print(( "    %s" % metadata ))
 
 
         if bShowMetadata:
@@ -881,28 +898,28 @@ def main( argv = None ):
         if bShowMetadata and papszMetadata is not None and len(papszMetadata) > 0 :
             print( "  Image Structure Metadata:" )
             for metadata in papszMetadata:
-                print( "    %s" % metadata )
+                print(( "    %s" % metadata ))
 
 
         hTable = hBand.GetRasterColorTable()
         if hBand.GetRasterColorInterpretation() == gdal.GCI_PaletteIndex  \
             and hTable is not None:
 
-            print( "  Color Table (%s with %d entries)" % (\
+            print(( "  Color Table (%s with %d entries)" % (\
                     gdal.GetPaletteInterpretationName( \
                         hTable.GetPaletteInterpretation(  )), \
-                    hTable.GetCount() ))
+                    hTable.GetCount() )))
 
             if bShowColorTable:
 
                 for i in range(hTable.GetCount()):
                     sEntry = hTable.GetColorEntry(i)
-                    print( "  %3d: %d,%d,%d,%d" % ( \
+                    print(( "  %3d: %d,%d,%d,%d" % ( \
                             i, \
                             sEntry[0],\
                             sEntry[1],\
                             sEntry[2],\
-                            sEntry[3] ))
+                            sEntry[3] )))
 
         if bShowRAT:
             hRAT = hBand.GetDefaultRAT()
@@ -914,45 +931,176 @@ def main( argv = None ):
 #/************************************************************************/
     for rasttype in tree.getiterator('rasttype'):
         rasttype.text = "Pixel"
+    #~ instrList = pszFilename.split("_")
     hBand = hDataset.GetRasterBand( 1 )
+    #~ #get the datatype
+    #~ if EQUAL(gdal.GetDataTypeName(hBand.DataType), "Float32"):
+        #~ sample_bits = 32
+        #~ sample_type = "PC_REAL"
+        #~ sample_mask = "2#11111111111111111111111111111111#"
+    #~ elif EQUAL(gdal.GetDataTypeName(hBand.DataType), "INT16"):
+        #~ sample_bits = 16
+        #~ sample_type = "LSB_INTEGER"
+        #~ sample_mask = "2#1111111111111111#"
+    #~ elif EQUAL(gdal.GetDataTypeName(hBand.DataType), "UINT16"):
+        #~ sample_bits = 16
+        #~ sample_type = "UNSIGNED_INTEGER"
+        #~ sample_mask = "2#1111111111111111#"
+    #~ elif EQUAL(gdal.GetDataTypeName(hBand.DataType), "Byte"):
+        #~ sample_bits = 8
+        #~ sample_type = "UNSIGNED_INTEGER"
+        #~ sample_mask = "2#11111111#"
+    #~ else:
+        #~ print( "  %s: Not supported pixel type" % gdal.GetDataTypeName(hBand.DataType))
+        #~ sys.exit(1)
+
+    #~ f.write('PDS_VERSION_ID            = PDS3\n')
+    #~ f.write('\n')
+    #~ f.write('/* The source image data definition. */\n')
+    #~ f.write('FILE_NAME      = \"%s\"\n' % (dst_img))
+    #~ f.write('RECORD_TYPE   = FIXED_LENGTH\n')
+    #~ f.write('RECORD_BYTES  = %d\n' % (hDataset.RasterYSize))
+    #~ f.write('FILE_RECORDS  = %d\n' % ((hDataset.RasterXSize * sample_bits / 8)) )
+    #~ #f.write('LABEL_RECORDS = 1\n')
+    #~ f.write('^IMAGE        = \"%s\"\n' % (dst_img))
+    #~ f.write('\n')
+    #~ f.write('/* Identification Information  */\n')
+    #~ f.write('DATA_SET_ID               = "%s"\n' % pszFilename.split(".")[0])
+    #~ f.write('DATA_SET_NAME             = "%s"\n' % pszFilename.split(".")[0])
+    #~ f.write('PRODUCER_INSTITUTION_NAME = "Lunar Mapping and Modeling Project"\n')
+    #~ f.write('PRODUCER_ID               = "LMMP_TEAM"\n')
+    #~ f.write('PRODUCER_FULL_NAME        = "LMMP TEAM"\n')
+    #~ f.write('PRODUCT_ID                = "%s"\n' % pszFilename.split(".")[0])
+    #~ if "_v" in pszFilename:
+        #~ f.write('PRODUCT_VERSION_ID        = "%s.0"\n' % instrList[-1].split(".")[0].upper())
+    #~ else:
+        #~ f.write('PRODUCT_VERSION_ID        = "%s"\n' % "V1.0")
+    #~ f.write('PRODUCT_TYPE              = "RDR"\n')
+    #~ f.write('INSTRUMENT_HOST_NAME      = "%s"\n' % instrList[0])
+    #~ f.write('INSTRUMENT_HOST_ID        = "%s"\n' % instrList[0])
+    #~ f.write('INSTRUMENT_NAME           = "%s"\n' % instrList[1])
+    #~ f.write('INSTRUMENT_ID             = "%s"\n' % instrList[1])
+    #~ f.write('TARGET_NAME               = MOON\n')
     for ellips in tree.getiterator('ellips'):
         ellips.text = target
+    #~ f.write('MISSION_PHASE_NAME        = "POST MISSION"\n')
+    #~ f.write('RATIONALE_DESC            = "Created at the request of NASA\'s Exploration\n')
+    #~ f.write('                            Systems Mission Directorate to support future\n')
+    #~ f.write('                            human exploration"\n')
+    #~ f.write('SOFTWARE_NAME             = "ISIS 3.2.1 | SOCET SET v5.5 (r) BAE Systems\n')
+    #~ f.write('                            | GDAL 1.8"\n')
+    #~ f.write('\n')
+    #~ f.write('/* Time Parameters */\n')
+    #~ f.write('START_TIME                   = "N/A"\n')
+    #~ f.write('STOP_TIME                    = "N/A"\n')
+    #~ f.write('SPACECRAFT_CLOCK_START_COUNT = "N/A"\n')
+    #~ f.write('SPACECRAFT_CLOCK_STOP_COUNT  = "N/A"\n')
+    #~ f.write('PRODUCT_CREATION_TIME        = %s\n' % strftime("%Y-%m-%dT%H:%M:%S"))   #2011-03-11T22:13:40
+    #~ f.write('\n')
+    #~ f.write('OBJECT = IMAGE_MAP_PROJECTION\n')
+    #~ f.write('    ^DATA_SET_MAP_PROJECTION     = "DSMAP.CAT"\n')
+    #~ f.write('    MAP_PROJECTION_TYPE          = \"%s\"\n' % mapProjection)
+    #~ f.write('    PROJECTION_LATITUDE_TYPE     = PLANETOCENTRIC\n')
+    #~ f.write('    A_AXIS_RADIUS                = %.1f <KM>\n' % semiMajor)
     for semiaxis in tree.getiterator('semiaxis'):
         semiaxis.text = str(semiMajor)
+    #~ f.write('    B_AXIS_RADIUS                = %.1f <KM>\n' % semiMajor)
+    #~ f.write('    C_AXIS_RADIUS                = %.1f <KM>\n' % semiMinor)
     for denflat in tree.getiterator('denflat'):
         denflat.text = str(invFlat)
+    #~ f.write('    COORDINATE_SYSTEM_NAME       = PLANETOCENTRIC\n')
+    #~ f.write('    POSITIVE_LONGITUDE_DIRECTION = EAST\n')
+    #~ f.write('    KEYWORD_LATITUDE_TYPE        = PLANETOCENTRIC\n')
+    #~ f.write('    /* NOTE:  CENTER_LATITUDE and CENTER_LONGITUDE describe the location   */\n')
+    #~ f.write('    /* of the center of projection, which is not necessarily equal to the  */\n')
+    #~ f.write('    /* location of the center point of the image.                          */\n')
+    #~ f.write('    CENTER_LATITUDE              = %5.2f <DEG>\n' % centLat)
+    #~ f.write('    CENTER_LONGITUDE             = %5.2f <DEG>\n' % centLon)
+    #~ f.write('    LINE_FIRST_PIXEL             = 1\n')
+    #~ f.write('    LINE_LAST_PIXEL              = %d\n' % hDataset.RasterYSize)
+    #~ f.write('    SAMPLE_FIRST_PIXEL           = 1\n')
+    #~ f.write('    SAMPLE_LAST_PIXEL            = %d\n' % hDataset.RasterXSize)
+    #~ f.write('    MAP_PROJECTION_ROTATION      = 0.0 <DEG>\n')
+    #~ f.write('    MAP_RESOLUTION               = %.4f <PIX/DEG>\n' % mapres )
     if (pszProjection[0:6] == "GEOGCS"):
         for latSize in tree.getiterator('latres'):
             latSize.text = str(latres)
             if debug:
-               print 'Lat resolution: %s' %(latSize.text)
+               print('Lat resolution: %s' %(latSize.text))
         for lonSize in tree.getiterator('lonres'):
             lonSize.text = str(lonres)
         for geogunit in tree.getiterator('geogunit'):
             geogunit.text = "Decimal degrees"
+    #~ f.write('    MAP_SCALE                    = %.8f <KM/PIXEL>\n' % kmres )
     else:
         for absres in tree.getiterator('absres'): # in meters
             absres.text = str(xres)
             if debug:
-               print 'X resolution: %s' %(absres.text)
+               print('X resolution: %s' %(absres.text))
         for ordres in tree.getiterator('ordres'):
             ordres.text = str(abs(yres))
         for plandu in tree.getiterator('plandu'):
             plandu.text = "meters"
+    #~ f.write('    MINIMUM_LATITUDE             = %.8f <DEGREE>\n' % lry)
     for southbc in tree.getiterator('southbc'):
         southbc.text = str(lry)
+    #~ f.write('    MAXIMUM_LATITUDE             = %.8f <DEGREE>\n' % uly)
     for northbc in tree.getiterator('northbc'):
         northbc.text = str(uly)
+    #~ f.write('    WESTERNMOST_LONGITUDE        = %.8f <DEGREE>\n' % ulx)
     for westbc in tree.getiterator('westbc'):
         westbc.text = str(ulx)
+    #~ f.write('    EASTERNMOST_LONGITUDE        = %.8f <DEGREE>\n' % lrx)
     for eastbc in tree.getiterator('eastbc'):
         eastbc.text = str(lrx)
+    #~ f.write('    LINE_PROJECTION_OFFSET       = %.1f\n' % ( (ulx / kmres * 1000 ) - 0.5 ))
+    #~ f.write('    SAMPLE_PROJECTION_OFFSET     = %.1f\n' % ( (uly / kmres * 1000 ) + 0.5 ))
+    #~ f.write('END_OBJECT = IMAGE_MAP_PROJECTION\n')
+    #~ f.write('\n')
+    #~ f.write('OBJECT = IMAGE\n')
+    #~ f.write('    NAME                       = \"%s\"\n' % (pszFilename))
+    #~ f.write('    DESCRIPTION                = "Export data set from LMMP portal.\n')
+    #~ f.write('                                 see filename for data type."\n')
+    #~ #f.write('\n')
+    #~ f.write('    LINES                      = %d\n' % hDataset.RasterYSize)
     for rowcount in tree.getiterator('rowcount'):
         rowcount.text = str(hDataset.RasterYSize)
+    #~ f.write('    LINE_SAMPLES               = %d\n' % hDataset.RasterXSize)
     for colcount in tree.getiterator('colcount'):
         colcount.text = str(hDataset.RasterYSize)
+    #~ f.write('    UNIT                       = METER\n')
+    #~ f.write('    OFFSET                     = %.10g\n' % ( hBand.GetOffset() ))
+    #~ f.write('    SCALING_FACTOR             = %.10g\n' % ( hBand.GetScale() ))
+    #~ f.write('    SAMPLE_TYPE                = %s\n' % (sample_type) )
+    #~ f.write('    SAMPLE_BITS                = %d\n' % (sample_bits) )
+    #~ f.write('    SAMPLE_BIT_MASK            = %s\n' % (sample_mask) )
+    #~ #f.write('\n')
+    #~ f.write('    BANDS                      = %d\n' % hDataset.RasterCount)
     for vrtcount in tree.getiterator('vrtcount'):
         vrtcount.text = str(hDataset.RasterCount)
+    #~ #f.write('\n')
+    #~ f.write('    BAND_STORAGE_TYPE          = BAND_SEQUENTIAL\n')
+    #~ if (sample_bits == 32) :
+        #~ f.write('    CORE_NULL                  = 16#FF7FFFFB#\n')
+        #~ f.write('    CORE_LOW_REPR_SATURATION   = 16#FF7FFFFC#\n')
+        #~ f.write('    CORE_LOW_INSTR_SATURATION  = 16#FF7FFFFD#\n')
+        #~ f.write('    CORE_HIGH_REPR_SATURATION  = 16#FF7FFFFF#\n')
+        #~ f.write('    CORE_HIGH_INSTR_SATURATION = 16#FF7FFFFE#\n')
+    #~ elif (sample_bits == 16) :
+        #~ f.write('    CORE_NULL                  = -32768\n')
+        #~ f.write('    CORE_LOW_REPR_SATURATION   = -32767\n')
+        #~ f.write('    CORE_LOW_INSTR_SATURATION  = -32766\n')
+        #~ f.write('    CORE_HIGH_REPR_SATURATION  = 32767\n')
+        #~ f.write('    CORE_HIGH_INSTR_SATURATION = 32768\n')
+    #~ else : #8bit
+        #~ f.write('    CORE_NULL                  = 0\n')
+        #~ f.write('    CORE_LOW_REPR_SATURATION   = 0\n')
+        #~ f.write('    CORE_LOW_INSTR_SATURATION  = 0\n')
+        #~ f.write('    CORE_HIGH_REPR_SATURATION  = 255\n')
+        #~ f.write('    CORE_HIGH_INSTR_SATURATION = 255\n')
+    #~ f.write('END_OBJECT = IMAGE\n')
+    #~ f.write('END\n')
+    #~ f.close()
     for metstdn in tree.getiterator('metstdn'):
         metstdn.text = "FGDC Content Standards for Digital Geospatial Metadata"
     for metstdv in tree.getiterator('metstdv'):
