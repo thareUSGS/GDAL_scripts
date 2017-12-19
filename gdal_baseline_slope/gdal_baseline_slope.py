@@ -347,7 +347,7 @@ if (crop and (baseline != 3)):
       cropdataset8 = out_driver.Create(cropfile8, newXSize, newYSize, \
                  outdataset.RasterCount, outGdalType)
       cropdataset8.SetProjection(outdataset.GetProjection())
-   print "cropping file with %d less pixels X=%d, Y=%d" % (baseline, newXSize, newYSize)
+   print("cropping file with "+ baseline +" less pixels X="+ newXSize + ", Y="+ newYSize)
 
    # Read geotransform matrix and calculate ground coordinates
    geomatrix = outdataset.GetGeoTransform()
@@ -368,11 +368,11 @@ if (crop and (baseline != 3)):
          cropBand.WriteArray(slope[1:,1:])
          X1 = X + cellsizeX
          Y1 = Y + cellsizeY
-	 newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
-	 cropdataset.SetGeoTransform(newGeomatrix)
+         newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
+         cropdataset.SetGeoTransform(newGeomatrix)
          if outType == 'Byte': 
             cropBand8.WriteArray(slope_masked[1:,1:])
-	    cropdataset8.SetGeoTransform(newGeomatrix)
+            cropdataset8.SetGeoTransform(newGeomatrix)
       elif baseline == 2:
          #shift 1 pixel in and remove pixel from right/bottom
          #raster_data = iBand.ReadAsArray(1, 1, cols - 1, rows - 1)
@@ -396,7 +396,7 @@ if (crop and (baseline != 3)):
             cropBand8.WriteArray(slope_masked[3:-2,3:-2])
             cropdataset8.SetGeoTransform(newGeomatrix)
       else:
-         print "This baseline not supported during a crop\n"
+         print("This baseline not supported during a crop")
 
       cropBand.SetNoDataValue(iBand.GetNoDataValue())
       cropBand.SetScale(iBand.GetScale())
