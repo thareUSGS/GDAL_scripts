@@ -4,8 +4,9 @@
 #  Name:     gdal_baseline_slope.py 
 #  Project:  GDAL Python Interface
 #  Purpose:  Given a DEM, calculate specialized slopes using various baseline
-#            lengths (1 baseline, 2 baseline, 5 baseline) as defined by R. Kirk. 
-#            The more commonly-used Horn's Method is also available.
+#            lengths (measured in pixels) as defined by R. Kirk. 
+#            If baseline is not specified, slopes will be calculated using
+#            Horn's Method.
 #  Author:   Trent Hare, thare@usgs.gov
 #  Credits:  Based on python GDAL samples 
 #            http://svn.osgeo.org/gdal/trunk/gdal/swig/python/samples/
@@ -53,7 +54,7 @@ from scipy.ndimage import generic_filter
 # Usage()
 def Usage():
     print("""
-Usage: gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop]  infile outfile.tif
+    Usage: gdal_baseline_slope.py [-baseline [integer]] [-ot Byte] [-crop]  infile outfile.tif
 """)
     sys.exit(1)
 
@@ -108,55 +109,18 @@ def ParseNoData(type):
 # This section contains functions that can be sent to
 # scipy generic_filter function.
 #
-# Future: make filter assignment variable nt just 1,2, and 5
-
-def calc_slope_baseline1(in_filter, x_cellsize, y_cellsize, noData):
+def calc_slope_baseline(in_filter, x_cellsize, y_cellsize, baseline, noData):
     if noData in in_filter:
         return noData #will return NoData around edge
     else:
-        #From 2x2 box, 
-        [a, b,
-         c, d] = in_filter
+         
+        [a, b, c, d] = in_filter
 
-        dz_dx = ((b + d) - (a + c)) / (2.0 * float(x_cellsize))
-        dz_dy = ((a + b) - (c + d)) / (2.0 * float(y_cellsize))
+        dz_dx = ((b + d) - (a + c)) / ((2.0 * baseline) * (x_cellsize))
+        dz_dy = ((a + b) - (c + d)) / ((2.0 * baseline) * (y_cellsize))
 
         slope = np.sqrt(dz_dx**2 + dz_dy**2)
         return np.degrees(np.arctan(slope)) #we want slope in degrees rather than radians
-    
-def calc_slope_baseline2(in_filter, x_cellsize, y_cellsize, noData):
-    if noData in in_filter:
-        return noData #will return NoData around edge
-    else:
-        #From 3x3 box, but note we are only using 4 corners in calculation
-        #which is why a dummy "z" variable is present
-        [a, z, b,
-         z, z, z,
-         c, z, d] = in_filter
-
-        dz_dx = ((b + d) - (a + c)) / (4.0 * float(x_cellsize))
-        dz_dy = ((a + b) - (c + d)) / (4.0 * float(y_cellsize))
-        slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
-    
-def calc_slope_baseline5(in_filter, x_cellsize, y_cellsize, noData):
-    if noData in in_filter:
-        return noData #will return NoData around edge
-    else:
-        #From 6x6 box, but note we are only using 4 corners in calculation
-        #which is why a dummy "z" variable is present
-        [ a,  z,  z,  z,  z,  b, 
-          z,  z,  z,  z,  z,  z, 
-          z,  z,  z,  z,  z,  z, 
-          z,  z,  z,  z,  z,  z, 
-          z,  z,  z,  z,  z,  z, 
-          c,  z,  z,  z,  z,  d] = in_filter
-         
-        dz_dx = ((b + d) - (a + c)) / (10.0 * float(x_cellsize))
-        dz_dy = ((a + b) - (c + d)) / (10.0 * float(y_cellsize))
-
-        slope = np.sqrt(dz_dx**2 + dz_dy**2)
-        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
 
 def calc_slope(in_filter, x_cellsize, y_cellsize, noData):
     # Use Horn's Method for slope calculation here - default if -baseline flag is not sent.
@@ -217,8 +181,8 @@ if infile is None:
 if  outfile is None:
     Usage()
 if baseline is None:
-    baseline = 3
-    print ("Warning: Using Horn's method for slope calculation, send -baseline VALUE [1,2,5] to set specialized calculation.")
+    # baseline = 3
+    print ("Warning: Using Horn's method for slope calculation, send -baseline VALUE to set specialized calculation.")
     
 # =============================================================================
 #Try to open input image, and get metadata
@@ -250,19 +214,8 @@ Y = geomatrix[3]
 cellsizeX = geomatrix[1]
 cellsizeY = geomatrix[5]
 
-# shift amount for baseline = 1 
-X1 = X - (cellsizeX / 2.0)
-Y1 = Y - (cellsizeY / 2.0)
-
-# shift amount for baseline = 2 
-# No shift
-
-# shift amount for baseline = 5 
-X5 = X - (cellsizeX / 2.0)
-Y5 = Y - (cellsizeY / 2.0)
-
 #define output format, name, size, type mostly based on input image
-#this is meant for 32bit ourput file
+#this is meant for 32bit output file
 out_driver = gdal.GetDriverByName(format)
 outdataset = out_driver.Create(outfile, indataset.RasterXSize, \
              indataset.RasterYSize, indataset.RasterCount, inType)
@@ -272,6 +225,23 @@ if outType == 'Byte':
    outdataset8 = out_driver.Create(outfile8, indataset.RasterXSize, \
              indataset.RasterYSize, indataset.RasterCount, outGdalType)
    outdataset8.SetProjection(indataset.GetProjection())
+
+if baseline is not None:
+   # Make sure baseline isn't set too large
+   if baseline >= min(cols/2.0, rows/2.0):
+      sys.exit("Error: Specified baseline is larger than half of the smallest image dimension")
+
+   # Define footprint structuring element for generic_filter, based on baseline
+   footprint =  np.zeros((baseline+1,baseline+1),dtype=bool)
+   # Only the 4 corners of the footprint are needed
+   footprint[0,0] = 1
+   footprint[0,baseline] = 1
+   footprint[baseline,0] = 1
+   footprint[baseline,baseline] = 1
+   ## If the baseline is an odd number, then X and Y in the output geotransform should be shifted by half a pixel
+   if (baseline % 2 != 0):
+      X = X - (cellsizeX / 2.0)
+      Y = Y - (cellsizeY / 2.0)
 
 #loop over bands -- probably can handle all bands at once...
 for band in range (1, indataset.RasterCount + 1):
@@ -284,29 +254,18 @@ for band in range (1, indataset.RasterCount + 1):
       outband8 = outdataset8.GetRasterBand(band)
 
    raster_data = iBand.ReadAsArray(0, 0, cols, rows)
-   if baseline == 1:
-      slope = generic_filter(raster_data, calc_slope_baseline1, size=2, mode='constant',
-                       cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
-      #shift half a pixel to center 
-      newGeomatrix = (X1 , geomatrix[1], geomatrix[2], Y1, geomatrix[4], geomatrix[5])
+   
+   if baseline is not None:
+      slope = generic_filter(raster_data, calc_slope_baseline, footprint=footprint, mode='constant',
+                             cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, baseline, outNoData))
+      ## If baseline is an even number, the new geomatrix will be shifted half a pixel,
+      ##  Otherwise, the new geomatrix will actually be identical to the geomatrix of the input file
+      newGeomatrix = (X , geomatrix[1], geomatrix[2], Y, geomatrix[4], geomatrix[5])
       outdataset.SetGeoTransform(newGeomatrix)
       if outType == 'Byte': 
-         outdataset8.SetGeoTransform(newGeomatrix)
-   elif baseline == 2:
-      slope = generic_filter(raster_data, calc_slope_baseline2, size=3, mode='constant',
-                       cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
-      outdataset.SetGeoTransform(indataset.GetGeoTransform())
-      if outType == 'Byte': 
-         outdataset8.SetGeoTransform(indataset.GetGeoTransform())
-   elif baseline == 5:
-      slope = generic_filter(raster_data, calc_slope_baseline5, size=6, mode='constant',
-                       cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
-      #shift half a pixel to center 
-      newGeomatrix = (X5 , geomatrix[1], geomatrix[2], Y5, geomatrix[4], geomatrix[5])
-      outdataset.SetGeoTransform(newGeomatrix)
-      if outType == 'Byte': 
-         outdataset8.SetGeoTransform(newGeomatrix)
+         outdataset8.SetGeoTransform(newGeomatrix)      
    else:
+      # Calculate slope using Horn's method
       slope = generic_filter(raster_data, calc_slope, size=3, mode='constant',
                        cval=outNoData, extra_arguments=(cellsizeX, cellsizeY, outNoData))
       outdataset.SetGeoTransform(indataset.GetGeoTransform())
@@ -363,7 +322,7 @@ if (crop and (baseline != 3)):
          iBand8 = outdataset8.GetRasterBand(band)
          cropBand8 = cropdataset8.GetRasterBand(band)
       if baseline == 1:
-         #no shift just removeing pixel from right and bottom
+         #no shift just removing pixel from right and bottom
          #raster_data = iBand.ReadAsArray(0, 0, cols - 1, rows - 1)
          cropBand.WriteArray(slope[1:,1:])
          X1 = X + cellsizeX
