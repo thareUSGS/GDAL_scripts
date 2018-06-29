@@ -1,0 +1,21 @@
+<GDAL_WMS>
+      <Service name="WMS">
+        <Version>1.1.1</Version>
+        <ServerUrl>http://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl_elev.map</ServerUrl>
+        <SRS>EPSG:4326</SRS>
+        <ImageFormat>image/tiff</ImageFormat>
+        <Layers>MOLA_elev</Layers>
+      </Service>
+      <DataWindow>
+        <UpperLeftX>230.9</UpperLeftX>
+        <UpperLeftY>23.9</UpperLeftY>
+        <LowerRightX>231.9</LowerRightX>
+        <LowerRightY>22.9</LowerRightY>
+         <SizeX>128</SizeX>
+         <SizeY>128</SizeY>
+      </DataWindow>
+      <Projection>EPSG:4326</Projection>
+      <BandsCount>1</BandsCount>
+      <DataType>Int16</DataType>
+    </GDAL_WMS>
+    
