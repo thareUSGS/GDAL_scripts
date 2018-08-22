@@ -3,13 +3,14 @@
     IAU2000 coded coordinate reference systems (CRS) for planetary bodies
     for use by Open GeospatialConsortium (OGC) web services (e.g. WMS,
     WCS, ect.). This is meant to be used like the EPSG Earth CRS codes.
-    IAU2009_v2.wkt references the IAU codes as defined in the 2009 paper (below).
+    IAU2009_v3.wkt references the IAU codes as defined in the 2009 paper and
+    IAU2015_v3.wkt references the IAU codes as defined in the 2015 paper (below).
 
     The OGC paper, docs\OpenGIS_Project_Document_06-119_Hare.doc, explains
     the proposal for using this WKT projection table.
 
 **Source directory:**
-    create_IAU2000_wkt_v2.py is a Python script creates a IAU2000 WKT
+    create_IAU2000_wkt_v3.py is a Python script creates a IAU2000 WKT
     for Open Geospatial Consortium WMS services from the 
     naifcodes_radii_m_wAsteroids_IAU2000.csv driver file.  
     It will create a IAU2000 coded system (similar to EPSG codes) for
@@ -17,9 +18,6 @@
     
 iau2wkt.c is a converted C program to do the same as above (http://github.com/YannChemin/iau2wkt).
 This was converted by Yann Chamin for potential addition to GDAL
-
-**Aug 2018:**
----- updates to support 2015 IAU report [3] and update 2009 definitions for just IAU (not IAU_IAG)
 
  **Feb 2016:**
 ---- update to report IAU Mean from reports, 
@@ -36,7 +34,10 @@ This was converted by Yann Chamin for potential addition to GDAL
 ---- updated to support -1 (NoData) in naifcodes_radii_m_wAsteroids_IAUxxxx.csv
 ---- updated to Python 3 (not much changed since such a simple script)
 
-source usage: create_IAU2000_wkt_v2.py naifcodes_radii_m_wAsteroids_IAU2000.csv [output.wtk]
+**Aug 2018:**
+---- updates to support 2015 IAU report [3] and update 2009 definitions for just IAU (not IAU_IAG)
+
+source usage: create_IAU2000_wkt_v3.py naifcodes_radii_m_wAsteroids_IAU2000.csv [output.wtk]
 
 **INPUT:** (naifcodes_radii_m_wAsteroids_IAU2000.csv or naifcodes_radii_m_wAsteroids_IAU2009.csv)
 **Example file format:**
@@ -81,7 +82,7 @@ The sources for the constants listed in this file for 2000, 2009, and 2015 are:
               G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer,
               J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst,
               P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas,
-              I. P. Williams (2011), "Report of the IAU/IAG Working Group
+              I. P. Williams (2011), "Report of the IAU Working Group
               on Cartographic Coordinates and Rotational Elements of the
               Planets and Satellites: 2009," Celestial Mechanics and Dynamical
               Astronomy, v.109, Issue 2, pp. 101-135.
@@ -90,7 +91,7 @@ The sources for the constants listed in this file for 2000, 2009, and 2015 are:
              G. J. Consolmagno, T. Duxbury, D. Hestroffer, J. L. Hilton,
              R. L. Kirk, S. A. Klioner, D. McCarthy, J. Oberst, J. Ping,
              P. K. Seidelmann, D. J. Tholen, P. C. Thomas,
-             I. P. Williams (2018), "Report of the IAU/IAG Working Group
+             I. P. Williams (2018), "Report of the IAU Working Group
              on Cartographic Coordinates and Rotational Elements of the
              Planets and Satellites: 2015," Celestial Mechanics and Dynamical
              Astronomy, 130: 22. https://doi.org/10.1007/s10569-017-9805-5.
