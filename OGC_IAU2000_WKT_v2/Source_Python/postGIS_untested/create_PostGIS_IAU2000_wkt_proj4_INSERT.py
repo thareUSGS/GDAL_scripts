@@ -14,6 +14,8 @@
 #---- changed Decimal_Degree to just Degree
 #July 2017:
 #---- Updated for Python v3 and support for -1 NoData values in table
+#Aug 2018:
+#---- Updated for 2015 IAU report and change 2009 to IAU from IAU_IAG
 #
 #  Description: This Python script creates a IAU2000 Proj4 for PostGIS services
 #
@@ -99,21 +101,45 @@ def main(argv):
 #     The sources for the constants listed in this file are:
 #
 #        [1]   Archinal, B. A., M. F. A'Hearn, E. Bowell, A. Conrad, 
-#              G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer, 
-#              J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst, 
-#              P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas, 
-#              I. P. Williams (2011), "Report of the IAU/IAG Working Group
+#               G. J. Consolmagno, R. Courtin, T. Fukushima, D. Hestroffer, 
+#               J. L. Hilton, G. A. Krasinsky, G. Neumann, J. Oberst, 
+#               P. K. Seidelmann, P. Stooke, D. J. Tholen, P. C. Thomas, 
+#               I. P. Williams (2011), "Report of the IAU Working Group
 #              on Cartographic Coordinates and Rotational Elements of the 
 #              Planets and Satellites: 2011," Celestial Mechanics and Dynamical
 #              Astronomy, v.109, Issue 2, pp. 101-135.
 #
 """
-        #if (theYear == "2000"):
-        #    fileToOutput.write(refs2000)
-        #elif (theYear == "2009"):
-        #    fileToOutput.write(refs2009)
-        #else:
-        #    print "Warning: No reference for the this year: " + theYear
+
+        refs2015 = """#IAU2015 WKT Codes
+# This file derived from the naif ID Codes.txt file distributed by 
+# USGS for NASA/IAU/NAIF (http://naif.jpl.nasa.gov/)
+#
+# 
+#     The sources for the constants listed in this file are:
+#
+#        [3] Archinal, B. A., C. H. Acton, M. F. A'Hearn, A. Conrad,
+#             G. J. Consolmagno, T. Duxbury, D. Hestroffer, J. L. Hilton,
+#             R. L. Kirk, S. A. Klioner, D. McCarthy, J. Oberst, J. Ping,
+#             P. K. Seidelmann, D. J. Tholen, P. C. Thomas,
+#             I. P. Williams (2018), "Report of the IAU Working Group
+#             on Cartographic Coordinates and Rotational Elements of the
+#             Planets and Satellites: 2015," Celestial Mechanics and Dynamical
+#             Astronomy, 130: 22. https://doi.org/10.1007/s10569-017-9805-5.
+#
+"""
+
+        if (theYear == "2000"):
+            group = "IAU_IAG"
+#           fileToOutput.write(refs2000)
+        elif (theYear == "2009"):
+            group = "IAU"
+#           fileToOutput.write(refs2009)
+        elif (theYear == "2015"):
+            group = "IAU"
+#           fileToOutput.write(refs2015)
+        else:
+            print("Warning: No reference for the this year: " + theYear)
 
         for line in open(inputTable):
             tokens = line.split(',')
@@ -155,8 +181,8 @@ def main(argv):
                     fileToOutput.write(theStr)
 
                     # WKT
-                    theStr = "%r,GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_IAU_IAG\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]," % (
-                        gisCode, theTarget, theYear, theTarget, theYear, theTarget, theYear, theA, flattening, theYear, gisCode)
+                    theStr = "%r,GEOGCS[\"%s %s\",DATUM[\"D_%s_%s\",SPHEROID[\"%s_%s_%s\",%r,%r]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"IAU%s\",\"%r\"]]," % (
+                        gisCode, theTarget, theYear, theTarget, theYear, theTarget, theYear, group, theA, flattening, theYear, gisCode)
                     fileToOutput.write(theStr)
 
                     # proj4
