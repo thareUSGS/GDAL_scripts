@@ -180,7 +180,9 @@ class WKT:
         assert radius > 0, "WKT.__init__: radius=%s, it must be > 0 for geogcsName=%s" % (radius, geogcsName)
         assert isinstance(inverseFlattening, (
             float, int)), "WKT.__init__: inverseFlattening must be a string for geogcsName=%s" % geogcsName
-        assert inverseFlattening >= 0, "WKT.__init__: inverseFlattening=%s, it must be >=0 for geogcsName=%s"%(inverseFlattening,geogcsName)
+        assert inverseFlattening >= 0, "WKT.__init__: inverseFlattening=%s, it must be >=0 for geogcsName=%s" % (
+            inverseFlattening, geogcsName
+        )
         assert isinstance(authorityName,
                           str), "WKT.__init__: authorityName must be a string for geogcsName=%s" % geogcsName
         assert isinstance(authorityCode,
@@ -932,7 +934,7 @@ class IAUCatalog:
         """
         logger.debug("Entering in __ckeckFileNameAndGetYear with file=%s" % file)
 
-        assert isinstance(file, (str)), "IAUCatalog.__ckeckFileNameAndGetYear: file must be a string"
+        assert isinstance(file, str), "IAUCatalog.__ckeckFileNameAndGetYear: file must be a string"
         # grab year from file name
         theYear = self.__file.split('IAU')[1].split('.')[0]
         if not self.__isInt(theYear):
@@ -1096,8 +1098,8 @@ class IAUCatalog:
         })
 
         # create an ographic CRS
-        # From IAU, the longitude direction (EAST/WEST) depends on the rotation direction. When the catalog does not have
-        # the rotation direction, then the ographic CRS is not created
+        # From IAU, the longitude direction (EAST/WEST) depends on the rotation direction. When the catalog does not
+        # have the rotation direction, then the ographic CRS is not created
         gisCode, ographic = self.__createOgraphicCrs(theNaifNum, theTarget, theA, flattening, theLongitudeName,
                                                      theLongitudePos, theRotation)
         # test if ographic CRS has been created
@@ -1133,15 +1135,15 @@ class IAUCatalog:
         :type theNaifNum: int
         :type theTarget: str
         :type theA: float
-        :type flattening: float
+        :type inverse_flattening: float
         :type theLongitudeName: str
         :type theLongitudePos: float
         :type theRotation: str
         :rtype: list
         """
 
-        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, inverse_flattening=%s, " \
-                     "theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
+        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, "
+                     "inverse_flattening=%s, theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
                          theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
                      ))
 
@@ -1179,14 +1181,14 @@ class IAUCatalog:
         :type theNaifNum: int
         :type theTarget: str
         :type theA: float
-        :type flattening: float
+        :type inverse_flattening: float
         :type theLongitudeName: str
         :type theLongitudePos: float
         :type theRotation: str
         :rtype: list
         """
 
-        logger.debug("Entering in __createOgraphicCrs with theNaifNum=%s, theTarget=%s, theA=%s, inverse_flattening=%s, "
+        logger.debug("Entering in __createOgraphicCrs with theNaifNum=%s, theTarget=%s, theA=%s, inverse_flattening=%s,"
                      "theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
                          theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
                      ))
@@ -1199,7 +1201,7 @@ class IAUCatalog:
         #  - if inverse_flattening = 0 (= a sphere) and a RETROGRADE rotation to have positive longitude to EAST
         if theRotation is not None \
                 and theTarget.upper() not in ["SUN", "MOON"]\
-                and not (inverse_flattening == 0 and theRotation == "RETROGRADE"):
+                and not (IAUCatalog.isEqual(inverse_flattening, 0) and theRotation == "RETROGRADE"):
             ographic = WKT(theTarget + " " + self.__theYear + " ographic",
                            "D_" + theTarget + "_" + self.__theYear,
                            theTarget + "_" + self.__theYear + "_" + self.__group,
@@ -1241,7 +1243,6 @@ class IAUCatalog:
             theNaifNum, theTarget, ocentric, ographic
         ))
 
-
         crs = []
         # iter on each defined projection
         for projection in WKT.Projection:
@@ -1257,8 +1258,6 @@ class IAUCatalog:
                 "wkt": newOcentric,
                 "type": WKT.CRS.PROJECTED_OCENTRIC
             })
-            # unset projection
-            #ocentric.unsetProjection()
 
             # define ographic projection when ographic CRS is defined
             if ographic is not None:
@@ -1271,9 +1270,6 @@ class IAUCatalog:
                     "wkt": newOgraphic,
                     "type": WKT.CRS.PROJECTED_OGRAPHIC
                 })
-
-                # unset projection
-                #ographic.unsetProjection()
 
         logger.debug("Exiting from __createProjectedCrs with %s" % crs)
         return crs
@@ -1337,7 +1333,7 @@ class IAUCatalog:
                 wktObj = crs['wkt']
                 # export all CRS having inverse_flattening=0 to avoid conversion error from ocentric latitude <-->
                 # ographic latitude with proj4
-                if IAUCatalog.isEqual(wktObj.getInverseFlattening(),0):
+                if IAUCatalog.isEqual(wktObj.getInverseFlattening(), 0):
 
                     # WKT validation
                     result, projString, wkt = WKT.isValid(wktObj.getWkt())
@@ -1433,7 +1429,7 @@ class IAUCatalog:
             # Select CRS based on long/lat and having inverse_flattening=0 to avoid conversion error from
             # latitude ocentric <--> ographic
             if (crs['type'] == WKT.CRS.OCENTRIC or crs['type'] == WKT.CRS.OGRAPHIC) \
-                    and IAUCatalog.isEqual(crs['wkt'].getInverseFlattening(),0):
+                    and IAUCatalog.isEqual(crs['wkt'].getInverseFlattening(), 0):
                 wktObj = crs['wkt']
                 year = wktObj.getAuthorityName().replace("IAU", "")
                 wkt = wktObj.getWkt()
