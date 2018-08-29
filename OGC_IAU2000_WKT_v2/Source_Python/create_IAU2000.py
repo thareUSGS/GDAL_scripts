@@ -439,18 +439,18 @@ class WKT:
                 "Latitude_Of_Center": 40.0
             }
         }
-        # TODO : AUTO_OBLIQUE_CYLINDRICAL not defined in GDAL 2.2.7 => produce an error
-        # It seems it is OK the next GDAL release : https://github.com/OSGeo/gdal/pull/101
-        AUTO_OBLIQUE_CYLINDRICAL = {  # Auto Oblique Cylindrical Equal Area -- Problem for this projection
-            "code": 78,
-            "projection": "Oblique_Cylindrical_Equal_Area",
-            "parameters": {
-                "False_Easting": 0,
-                "False_Northing": 0,
-                "Central_Meridian": 0.0,
-                "Standard_Parallel_1": 0.0
-            }
-        }
+        # # It seems it is OK the next GDAL release : https://github.com/OSGeo/gdal/pull/101
+        # # Need to check projection parameters when fixed in GDAL
+        # AUTO_OBLIQUE_CYLINDRICAL = {  # Auto Oblique Cylindrical Equal Area -- Problem for this projection
+        #     "code": 78,
+        #     "projection": "Oblique_Cylindrical_Equal_Area",
+        #     "parameters": {
+        #         "False_Easting": 0,
+        #         "False_Northing": 0,
+        #         "Central_Meridian": 0.0,
+        #         "Standard_Parallel_1": 0.0
+        #     }
+        # }
         AUTO_MOLLWEIDE = {  # Auto Mollweide
             "code": 80,
             "url": "https://proj4.org/operations/projections/moll.html",
