@@ -177,9 +177,7 @@ class WKT:
         assert radius > 0, "WKT.__init__: radius=%s, it must be > 0 for geogcsName=%s" % (radius, geogcsName)
         assert isinstance(inverseFlattening, (
             float, int)), "WKT.__init__: inverseFlattening must be a string for geogcsName=%s" % geogcsName
-        # TODO : flattening could be negative, is it OK ?
-        # look to 1000041,Hartley 2,580.00,340.00,1160.00,1160.00,,,
-        #assert inverseFlattening >= 0, "WKT.__init__: inverseFlattening=%s, it must be >=0 for geogcsName=%s"%(inverseFlattening,geogcsName)
+        assert inverseFlattening >= 0, "WKT.__init__: inverseFlattening=%s, it must be >=0 for geogcsName=%s"%(inverseFlattening,geogcsName)
         assert isinstance(authorityName,
                           str), "WKT.__init__: authorityName must be a string for geogcsName=%s" % geogcsName
         assert isinstance(authorityCode,
@@ -949,9 +947,7 @@ class IAUCatalog:
 
         # Check to see if the Mean should be used, for traxial
         # bodies
-        # TODO : is it OK ?
-        if self.__isDifferent(theA, theB) and self.__isDifferent(theA, theC) and self.__isDifferent(theB, theC) \
-                and self.__isDifferent(theMean, -1):
+        if self.__isDifferent(theA, theB) and self.__isDifferent(theA, theC) and self.__isDifferent(theMean, -1):
             theA = theMean
             theC = theMean
 
