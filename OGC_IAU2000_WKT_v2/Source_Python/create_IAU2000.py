@@ -63,6 +63,7 @@ import logging
 import argparse
 import time
 import functools
+import copy
 
 try:
     import coloredlogs
@@ -471,6 +472,121 @@ class WKT:
             }
         }
 
+    def getGeoGcsName(self):
+        """
+        Returns the geogcsName
+        :return: the geogcsName
+        :rtype: str
+        """
+        return self.__geogcsName
+
+    def getDatumName(self):
+        """
+        Returns the datumName
+        :return: the datumName
+        :rtype: str
+        """
+        return self.__datumName
+
+    def getSpheroidName(self):
+        """
+        Returns the spheroidName
+        :return: the spheroidName
+        :rtype: str
+        """
+        return self.__sphereoidName
+
+    def getRadius(self):
+        """
+        Returns the radius of the spheroid in meter
+        :return: the radius
+        :rtype: float
+        """
+        return self.__radius
+
+    def getInverseFlattening(self):
+        """
+        Returns the inverse flattening of the spheroid.
+
+        0 means we have a sphere
+        :return: the inverse flattening of the spheroid
+        :rtype: float
+        """
+        return self.__inverseFlattening
+
+    def getAuthorityName(self):
+        """
+        Returns the authority name of the spheroid
+        :return: the authority name
+        :rtype: str
+        """
+        return self.__authorityName
+
+    def getAuthorityCode(self):
+        """
+        Returns the authority code of the spheroid
+        :return: the authority code
+        :rtype: str
+        """
+        return self.__authorityCode
+
+    def getProjection(self):
+        """
+        Returns the used projection
+        :return: None when no defined projection otherwise the Projection object
+        :rtype: None or WKT.Projection
+        """
+        return self.__projection
+
+    def getProjectionName(self):
+        """
+        Returns the projection name
+        :return: None when no defined projection otherwise the projection name
+        :rtype: None or str
+        """
+        return self.__projectionName
+
+    def getProjectionAuthorityName(self):
+        """
+        Returns the projection authority name
+        :return: None when no defined projection otherwise the projection authority name
+        :rtype: None or str
+        """
+        return self.__projectionAuthorityName
+
+    def getProjectionAuthorityCode(self):
+        """
+        Returns the projection authority code of the spheroid
+        :return: None when no defined projection otherwise the projection authority code
+        :rtype: None or str
+        """
+        return self.__projectionAutorityCode
+
+    def getLongitudeAxisOrder(self):
+        """
+        Returns the LongitudeAxis
+        This defines how the longitude axis is counted positively (East or West)
+        :return: None by default otherwise WKT.LongitudeAxis
+        :rtype: None or WKT.LongitudeAxis
+        """
+        return self.__longitudeAxisOrder
+
+    def getLongitudeName(self):
+        """
+        Returns the name of the reference meridian
+        :return: the longitudeName
+        :rtype: str
+        """
+        return self.__longitudeName
+
+    def getLongitudePos(self):
+        """
+        Returns the position of the reference meridian
+        :return: the position of the reference meridian
+        :rtype: float
+        """
+        return self.__longitudePos
+
     def setLongitudeAxis(self, longitudeAxis):
         """
         Sets the longitude axis.
@@ -518,7 +634,7 @@ class WKT:
         :param projectionAuthorityName: name of the responsible for defining the projection
         :param projectionAuthorityCode: ID within the authority name that defines the projection
         :type projectionName: str
-        :type projectionEnum: str
+        :type projectionEnum: WKT.Projection
         :type projectionAuthorityName: str
         :type projectionAuthorityCode: str
         """
@@ -641,6 +757,14 @@ class WKT:
 
         logger.debug("Exiting from getWkt")
         return result
+
+    def clone(self):
+        """
+        Clone this object.
+        :return: this WKT object
+        :rtype: WKT
+        """
+        return copy.copy(self)
 
     @staticmethod
     def __fixWKTforProj4(wkt, proj4):
@@ -883,7 +1007,8 @@ class IAUCatalog:
         logger.debug("Exiting from __isNumber with %s" % bool_a)
         return bool_a
 
-    def __isEqual(self, number1, number2, allowed_error=1e-9):
+    @staticmethod
+    def isEqual(number1, number2, allowed_error=1e-9):
         """ Returns True when number1=number2 otherwide False
 
         :param number1: number to test
@@ -907,7 +1032,8 @@ class IAUCatalog:
         logger.debug("Exiting from __isEqual with %s" % result)
         return result
 
-    def __isDifferent(self, number1, number2, allowed_error=1e-9):
+    @staticmethod
+    def isDifferent(number1, number2, allowed_error=1e-9):
         """
         Returns True when number1<>number2 otherwise False
 
@@ -920,14 +1046,14 @@ class IAUCatalog:
         :type allowed_error: float
         :rtype: bool
         """
-        return not self.__isEqual(number1, number2, allowed_error)
+        return not IAUCatalog.isEqual(number1, number2, allowed_error)
 
     def __processLine(self, tokens):
         """
         Process a line of the catalog
 
         :param tokens: the parameters of the catalog
-        :return: the crs object
+        :return: the crs list
         :type tokens: list
         :rtype: list
         """
@@ -947,42 +1073,37 @@ class IAUCatalog:
 
         # Check to see if the Mean should be used, for traxial
         # bodies
-        if self.__isDifferent(theA, theB) and self.__isDifferent(theA, theC) and self.__isDifferent(theMean, -1):
+        if IAUCatalog.isDifferent(theA, theB) \
+                and IAUCatalog.isDifferent(theA, theC) \
+                and IAUCatalog.isDifferent(theMean, -1):
             theA = theMean
             theC = theMean
 
         flattening = ((theA - theC) / theA)
-        if self.__isDifferent(flattening, 0):
+        if IAUCatalog.isDifferent(flattening, 0):
             flattening = 1 / flattening
 
         # create an ocentric CRS
         # From IAU, all CRS can be defined as ocentric with the longitude counted positively to East
-        gisCode, ocentric = self.__createOcentricCrs(theNaifNum, theTarget, theA, flattening, theLongitudeName,
+        gisCode, ocentric = self.__createOcentricCrs(theNaifNum, theTarget, theA, 0.0, theLongitudeName,
                                                      theLongitudePos, theRotation)
         crs.append({
-            "authority": "IAU" + str(self.__theYear),
-            "code": gisCode,
             "target": theTarget,
-            "wkt": ocentric.getWkt(),
-            "type": WKT.CRS.OCENTRIC,
-            "projection": None
+            "wkt": ocentric,
+            "type": WKT.CRS.OCENTRIC
         })
 
         # create an ographic CRS
         # From IAU, the longitude direction (EAST/WEST) depends on the rotation direction. When the catalog does not have
         # the rotation direction, then the ographic CRS is not created
-        # TODO : OK with me ?
         gisCode, ographic = self.__createOgraphicCrs(theNaifNum, theTarget, theA, flattening, theLongitudeName,
                                                      theLongitudePos, theRotation)
         # test if ographic CRS has been created
         if ographic is not None:
             crs.append({
-                "authority": "IAU" + str(self.__theYear),
-                "code": gisCode,
                 "target": theTarget,
-                "wkt": ographic.getWkt(),
-                "type": WKT.CRS.OGRAPHIC,
-                "projection": None
+                "wkt": ographic,
+                "type": WKT.CRS.OGRAPHIC
             })
         else:
             logger.warning("No ographic CRS for %s because the rotation direction is not defined." % theTarget)
@@ -1024,7 +1145,7 @@ class IAUCatalog:
 
         # define the IAU code
         gisCode = theNaifNum * 100
-        ocentric = WKT(theTarget + " " + self.__theYear,
+        ocentric = WKT(theTarget + " " + self.__theYear + " ocentric",
                        "D_" + theTarget + "_" + self.__theYear,
                        theTarget + "_" + self.__theYear + "_" + self.__group,
                        theA,
@@ -1072,7 +1193,7 @@ class IAUCatalog:
         ographic = None
         # if not rotation direction, we do not know the direction of axis. So, we do not allow to create an ographic CRS
         if theRotation is not None:
-            ographic = WKT(theTarget + " " + self.__theYear,
+            ographic = WKT(theTarget + " " + self.__theYear + " ographic",
                            "D_" + theTarget + "_" + self.__theYear,
                            theTarget + "_" + self.__theYear + "_" + self.__group,
                            theA,
@@ -1104,8 +1225,8 @@ class IAUCatalog:
         :return: a list that contains all projected CRS
         :type theNaifNum: int
         :type theTarget: str
-        :type ocentric: list
-        :type ographic: list
+        :type ocentric: WKT
+        :type ographic: WKT
         :rtype: a list that contains all projected CRS
         """
 
@@ -1113,41 +1234,39 @@ class IAUCatalog:
             theNaifNum, theTarget, ocentric, ographic
         ))
 
+
         crs = []
         # iter on each defined projection
         for projection in WKT.Projection:
+            newOcentric = ocentric.clone()
+
             # define ocentric projection
             gisCode = theNaifNum * 100 + projection.value['code']
             prjName = projection.value['projection']
-            ocentric.setProjection(theTarget + "_" + prjName, projection, "IAU" + self.__theYear, str(gisCode))
+            newOcentric.setProjection(theTarget + "_" + prjName, projection, "IAU" + self.__theYear, str(gisCode))
             # save projection
             crs.append({
-                "authority": "IAU" + str(self.__theYear),
-                "code": gisCode,
                 "target": theTarget,
-                "wkt": ocentric.getWkt(),
-                "type": WKT.CRS.PROJECTED_OCENTRIC,
-                "projection":projection
+                "wkt": newOcentric,
+                "type": WKT.CRS.PROJECTED_OCENTRIC
             })
             # unset projection
-            ocentric.unsetProjection()
+            #ocentric.unsetProjection()
 
             # define ographic projection when ographic CRS is defined
             if ographic is not None:
+                newOgraphic = ographic.clone()
                 gisCode = gisCode + 1
-                ographic.setProjection(theTarget + "_" + prjName, projection, "IAU" + self.__theYear, str(gisCode))
+                newOgraphic.setProjection(theTarget + "_" + prjName, projection, "IAU" + self.__theYear, str(gisCode))
                 # save projection
                 crs.append({
-                    "authority": "IAU" + str(self.__theYear),
-                    "code": gisCode,
                     "target": theTarget,
-                    "wkt": ographic.getWkt(),
-                    "type": WKT.CRS.PROJECTED_OGRAPHIC,
-                    "projection": projection
+                    "wkt": newOgraphic,
+                    "type": WKT.CRS.PROJECTED_OGRAPHIC
                 })
 
                 # unset projection
-                ographic.unsetProjection()
+                #ographic.unsetProjection()
 
         logger.debug("Exiting from __createProjectedCrs with %s" % crs)
         return crs
@@ -1173,9 +1292,9 @@ class IAUCatalog:
         data = []
         for line in open(self.__file):
             tokens = line.rstrip().split(',')
-            if not self.__isInt(tokens[0]) or (self.__isEqual(float(tokens[2]), -1)
-                                               and self.__isEqual(float(tokens[3]), -1)
-                                               and self.__isEqual(float(tokens[4]), -1)):
+            if not self.__isInt(tokens[0]) or (IAUCatalog.isEqual(float(tokens[2]), -1)
+                                               and IAUCatalog.isEqual(float(tokens[3]), -1)
+                                               and IAUCatalog.isEqual(float(tokens[4]), -1)):
                 logger.warning("%s is ignored", tokens)
             else:
                 # Then Radii values exist in input table and naif is a number
@@ -1192,11 +1311,12 @@ class IAUCatalog:
         :param filename: output filename
         """
 
-        logger.warning("Export only ocentric CRS or projected ocentric CRS while proj4 does not convert correctly "
-                       "ocentric latitude to ographic latitude")
+        logger.warning("Export only ocentric, projected ocentric or ographic (with invserseFlattening=0) CRS "
+                       "while proj4 does not convert correctly ocentric latitude to ographic latitude")
+
         hasValidationError = False
         if filename is None:
-            filename = crss[0]['authority']
+            filename = crss[0]['wkt'].getAuthorityName()
 
         if filename and filename is not sys.stdout:
             fileToOutput = open(filename, 'w')
@@ -1204,27 +1324,39 @@ class IAUCatalog:
             fileToOutput = filename
 
         try:
-            fileToOutput.write("%s\n" % IAUCatalog.REFERENCES[crss[0]['authority']])
+            fileToOutput.write("%s\n" % IAUCatalog.REFERENCES[crss[0]['wkt'].getAuthorityName()])
             for crs in crss:
                 crsType = crs['type']
-                # use only ocentric or projected ocentric while proj4 cannot convert ocentric latitude to ographic latitude
-                # in the right way. Actually, there is an error (~20m on Earth at latitude 45)
-                # TODO : Ok with me ?
-                if crsType == WKT.CRS.OCENTRIC or crsType == WKT.CRS.PROJECTED_OCENTRIC:
-                    result, projString, wkt = WKT.isValid(crs['wkt'])
+                wktObj = crs['wkt']
+                # export all CRS having inverse_flattening=0 to avoid conversion error from ocentric latitude <-->
+                # ographic latitude with proj4
+                if IAUCatalog.isEqual(wktObj.getInverseFlattening(),0):
+
+                    # WKT validation
+                    result, projString, wkt = WKT.isValid(wktObj.getWkt())
+
                     if result:
-                        if crs['projection'] is None:
+                        # WKT valid
+
+                        # Get the right authority
+                        if wktObj.getProjection() is None:
                             projection = ""
+                            authorityCode = wktObj.getAuthorityCode()
+                            authorityName = wktObj.getAuthorityName()
                         else:
-                            projection = " - "+crs['projection'].value['projection']
+                            authorityCode = wktObj.getProjectionAuthorityCode()
+                            authorityName = wktObj.getProjectionAuthorityName()
+                            projection = " - "+wktObj.getProjection().value['projection']
 
                         fileToOutput.write(
                             "#%s : %s WKT Codes for %s : %s %s\n" % (
-                                crs['code'], crs['authority'], crs['target'], crs['type'].value, projection
+                                authorityCode, authorityName,
+                                crs['target'], crsType.value, projection
                             )
                         )
-                        fileToOutput.write("<%s> %s\n" % (crs['code'], projString))
+                        fileToOutput.write("<%s> %s\n" % (authorityCode, projString))
                     else:
+                        # WKT not valid, skip it
                         hasValidationError = True
             fileToOutput.close()
 
@@ -1244,7 +1376,7 @@ class IAUCatalog:
         """
         hasValidationError = False
         if filename is None:
-            filename = crss[0]['authority'] + "_v4.wkt"
+            filename = crss[0]['wkt'].getAuthorityName() + "_v4.wkt"
 
         if filename and filename is not sys.stdout:
             fileToOutput = open(filename, 'w')
@@ -1253,18 +1385,29 @@ class IAUCatalog:
 
         try:
             target = ""
-            authority = crss[0]['authority']
+            authority = crss[0]['wkt'].getAuthorityName()
             fileToOutput.write("%s\n" % IAUCatalog.REFERENCES[authority])
             for crs in crss:
-                if crs['target'] != target:  # authority
-                    fileToOutput.write("\n\n#%s WKT Codes for %s\n" % (crs['authority'], crs['target']))
+                wktObj = crs['wkt']
+                if crs['target'] != target:
+                    fileToOutput.write("\n\n#%s WKT Codes for %s\n" % (wktObj.getAuthorityName(), crs['target']))
                     target = crs['target']
-                result, projString, wkt = WKT.isValid(crs['wkt'])
-                if result:
-                    fileToOutput.write("%s,%s\n" % (crs['code'], wkt))
+
+                # Get the authority of the projection if it exists other this one from the datum
+                if wktObj.getProjection() is None:
+                    authorityCode = wktObj.getAuthorityCode()
                 else:
+                    authorityCode = wktObj.getProjectionAuthorityCode()
+
+                # WKT validation
+                result, projString, wkt = WKT.isValid(wktObj.getWkt())
+                if result:
+                    # write it when WKT is valid
+                    fileToOutput.write("%s,%s\n" % (authorityCode, wkt))
+                else:
+                    # write it as a comment when the WKT is not valid
                     hasValidationError = True
-                    fileToOutput.write("# %s,%s\n" % (crs['code'], wkt))
+                    fileToOutput.write("# %s,%s\n" % (authorityCode, wkt))
 
             if hasValidationError:
                 raise WKT.ValidationError()
@@ -1274,22 +1417,31 @@ class IAUCatalog:
 
     @staticmethod
     def saveAsPrj(crss):
-        logger.warning("Export only ocentric CRS while proj4 does not convert correctly "
-                       "ocentric latitude to ographic latitude")
+
+        logger.warning("Export only CRS based on long/lat with invserseFlattening=0 "
+                       "while proj4 does not convert correctly ocentric latitude to ographic latitude")
+
         hasValidationError = False
         for crs in crss:
-            # TODO : I only export Ocentric while the ographic problem is not solved with proj4. OK with me ?
-            if crs['type'] == WKT.CRS.PROJECTED_OCENTRIC:
-                year = crs['authority'].replace("IAU", "")
-                wkt = crs['wkt']
+            # Select CRS based on long/lat and having inverse_flattening=0 to avoid conversion error from
+            # latitude ocentric <--> ographic
+            if (crs['type'] == WKT.CRS.OCENTRIC or crs['type'] == WKT.CRS.OGRAPHIC) \
+                    and IAUCatalog.isEqual(crs['wkt'].getInverseFlattening(),0):
+                wktObj = crs['wkt']
+                year = wktObj.getAuthorityName().replace("IAU", "")
+                wkt = wktObj.getWkt()
                 target = crs['target']
+
+                # WKT validation
                 result, projString, wkt = WKT.isValid(wkt)
                 if result:
-                    outputPrjFile = "%s %s.prj" % (target, year)
+                    # WKT valid, write PRJ file
+                    outputPrjFile = "%s %s %s.prj" % (target, year, crs['type'])
                     fileToOutput = open(outputPrjFile, 'w')
                     fileToOutput.write("%s" % wkt)
                     fileToOutput.close()
                 else:
+                    # WKT no valid, skip it
                     hasValidationError = True
                     logger.error("WKT %s is not valid" % wkt)
 
