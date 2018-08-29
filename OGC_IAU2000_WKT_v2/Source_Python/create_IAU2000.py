@@ -20,7 +20,7 @@
 # ---- Updated for 2015 IAU report and change 2009 to IAU from IAU_IAG
 # ---- Code refactoring (logging, class, enumerations, removed repetition of WKT string, command line parser)
 # ---- Added creation capabilities for prj and iniFile for proj4
-# ---- Added rotation sens consideration for ocentric and ographic CRS
+# ---- Added rotation direction consideration for ocentric and ographic CRS
 # ---- Improved WKT (towgs84 string for datum shifting)
 # ---- Fixed bug about projection parameter (Fully compliant with gdal)
 # ---- Fixed bug about Halley WKT (radius was -1)
@@ -121,7 +121,7 @@ class WKT:
         retrograde.
         When  <axis order> is not defined, longitude is counted positvely to East for ographic CRS : this means all
         bodies having a retrograde rotation.  When planet rotates to direct, <axis order> must be defined with longitude
-        positive to West for ographic CRS. The rotation sens can be defined by ``setLongitudeAxis`` method.
+        positive to West for ographic CRS. The rotation direction can be defined by ``setLongitudeAxis`` method.
         Sun, Earth and Moon are the exception to this rule because their rotation is direct but the longitude is counted
         positively to East for ographic CRS.
         For ocentric CRS, the mathematical convention for spherical coordinates is applied : the longitude is always
@@ -496,7 +496,7 @@ class WKT:
         :param longitudeName: a particular point on the planet that defines a longitude. By default this value is
         set to "Reference_Meridian"
         :param longitudePos: longitude position in decimal degree [0..360] of the longitudeName.
-        The longitudePos is defined in the rotation sens of the planet
+        The longitudePos is defined in the rotation direction of the planet
         :type longitudeName: str
         :type longitudePos: float
         """
@@ -973,8 +973,8 @@ class IAUCatalog:
         })
 
         # create an ographic CRS
-        # From IAU, the longitude sens (EAST/WEST) depends on the rotation sens. When the catalog does not have
-        # the rotation sens, then the ographic CRS is not created
+        # From IAU, the longitude direction (EAST/WEST) depends on the rotation direction. When the catalog does not have
+        # the rotation direction, then the ographic CRS is not created
         # TODO : OK with me ?
         gisCode, ographic = self.__createOgraphicCrs(theNaifNum, theTarget, theA, flattening, theLongitudeName,
                                                      theLongitudePos, theRotation)
@@ -989,7 +989,7 @@ class IAUCatalog:
                 "projection": None
             })
         else:
-            logger.warning("No ographic CRS for %s because the rotation sens is not defined." % theTarget)
+            logger.warning("No ographic CRS for %s because the rotation direction is not defined." % theTarget)
 
         # create a projected CRS for each defined Projection on both ocentric and ographic CRS
         projectedCrss = self.__createProjectedCrs(theNaifNum, theTarget, ocentric, ographic)
@@ -1009,7 +1009,7 @@ class IAUCatalog:
         :param flattening: the inverse flattening parameter
         :param theLongitudeName: the longitude name
         :param theLongitudePos: the longitude pos
-        :param theRotation: the rotation sens
+        :param theRotation: the rotation direction
         :return: a list with the gis code and the ocentric CRS
         :type theNaifNum: int
         :type theTarget: str
@@ -1040,7 +1040,7 @@ class IAUCatalog:
         if theRotation is None or theRotation.upper() == "DIRECT":
             ocentric.setPrimem(theLongitudeName, theLongitudePos)
         else:
-            # invert the longitude when sens is RETROGRADE because we need to transform it in the DIRECT sens
+            # invert the longitude when direction is RETROGRADE because we need to transform it in the DIRECT direction
             ocentric.setPrimem(theLongitudeName, theLongitudePos * -1)
 
         logger.debug("Exiting from __createOcentricCrs with gisCode=%s ographic=%s" % (gisCode, ocentric.getWkt()))
@@ -1055,7 +1055,7 @@ class IAUCatalog:
         :param flattening: the inverse flattening parameter
         :param theLongitudeName: the longitude name
         :param theLongitudePos: the longitude pos
-        :param theRotation: the rotation sens
+        :param theRotation: the rotation direction
         :return: a list with the gis code and the ographic CRS
         :type theNaifNum: int
         :type theTarget: str
@@ -1074,7 +1074,7 @@ class IAUCatalog:
 
         gisCode = theNaifNum * 100 + 1
         ographic = None
-        # if not rotation sens, we do not know the sens of axis. So, we do not allow to create an ographic CRS
+        # if not rotation direction, we do not know the direction of axis. So, we do not allow to create an ographic CRS
         if theRotation is not None:
             ographic = WKT(theTarget + " " + self.__theYear,
                            "D_" + theTarget + "_" + self.__theYear,
