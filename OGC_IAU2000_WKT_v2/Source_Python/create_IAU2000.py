@@ -26,6 +26,8 @@
 # ---- Fixed bug about Halley WKT (radius was -1)
 # ---- Changed algorithm for triaxial ellipsoids
 # ---- Added WKT validation
+# ---- Avoided WKT duplication when ocentric CRS has the same signature as ographic CRS
+# ---- Exported PRJ/PROJ for no ellisoid body
 #
 #
 #  Description: This Python script creates a IAU2000/2009/2015 WKT projection strings for WMS services. prj and
@@ -423,7 +425,7 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Central_Meridian": 0,
-                "Scale_Factor": 1  # TODO : Check this value - transverse mercator is defined to 0.9996
+                "Scale_Factor": 1
             }
         }
         AUTO_ALBERS = {  # Auto Albers
@@ -1115,7 +1117,7 @@ class IAUCatalog:
         logger.debug("Exiting from __processLine with crs=%s" % crs)
         return crs
 
-    def __createOcentricCrs(self, theNaifNum, theTarget, theA, flattening, theLongitudeName, theLongitudePos,
+    def __createOcentricCrs(self, theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos,
                             theRotation):
         """
         Creates an ocentric CRS based on longitude/latitude
@@ -1123,7 +1125,7 @@ class IAUCatalog:
         :param theNaifNum: the Naif Num
         :param theTarget: the target
         :param theA: the radius in meter
-        :param flattening: the inverse flattening parameter
+        :param inverse_flattening: the inverse flattening parameter
         :param theLongitudeName: the longitude name
         :param theLongitudePos: the longitude pos
         :param theRotation: the rotation direction
@@ -1138,9 +1140,9 @@ class IAUCatalog:
         :rtype: list
         """
 
-        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, flattening=%s, " \
+        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, inverse_flattening=%s, " \
                      "theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
-                         theNaifNum, theTarget, theA, flattening, theLongitudeName, theLongitudePos, theRotation
+                         theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
                      ))
 
         # define the IAU code
@@ -1149,7 +1151,7 @@ class IAUCatalog:
                        "D_" + theTarget + "_" + self.__theYear,
                        theTarget + "_" + self.__theYear + "_" + self.__group,
                        theA,
-                       flattening,
+                       inverse_flattening,
                        "IAU" + str(self.__theYear),
                        str(gisCode))
 
@@ -1163,13 +1165,13 @@ class IAUCatalog:
         logger.debug("Exiting from __createOcentricCrs with gisCode=%s ographic=%s" % (gisCode, ocentric.getWkt()))
         return [gisCode, ocentric]
 
-    def __createOgraphicCrs(self, theNaifNum, theTarget, theA, flattening, theLongitudeName, theLongitudePos,
+    def __createOgraphicCrs(self, theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos,
                             theRotation):
         """ Creates an ographic CRS based on longitude/latitude
         :param theNaifNum: the Naif Num
         :param theTarget: the target
         :param theA: the radius in meter
-        :param flattening: the inverse flattening parameter
+        :param inverse_flattening: the inverse flattening parameter
         :param theLongitudeName: the longitude name
         :param theLongitudePos: the longitude pos
         :param theRotation: the rotation direction
@@ -1184,25 +1186,30 @@ class IAUCatalog:
         :rtype: list
         """
 
-        logger.debug("Entering in __createOgraphicCrs with theNaifNum=%s, theTarget=%s, theA=%s, flattening=%s, "
+        logger.debug("Entering in __createOgraphicCrs with theNaifNum=%s, theTarget=%s, theA=%s, inverse_flattening=%s, "
                      "theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
-                         theNaifNum, theTarget, theA, flattening, theLongitudeName, theLongitudePos, theRotation
+                         theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
                      ))
 
         gisCode = theNaifNum * 100 + 1
         ographic = None
-        # if not rotation direction, we do not know the direction of axis. So, we do not allow to create an ographic CRS
-        if theRotation is not None:
+        # Here are the rules to create an ographic CRS and to avoid a duplication with ocentric CRS:
+        #  - if not rotation direction, we do not know the direction of axis. So, an ographic CRS is forbidden
+        #  - if target is Sun or Moon, SUN and Moon are two spherical bodies with positive longitude to EAST by usage
+        #  - if inverse_flattening = 0 (= a sphere) and a RETROGRADE rotation to have positive longitude to EAST
+        if theRotation is not None \
+                and theTarget.upper() not in ["SUN", "MOON"]\
+                and not (inverse_flattening == 0 and theRotation == "RETROGRADE"):
             ographic = WKT(theTarget + " " + self.__theYear + " ographic",
                            "D_" + theTarget + "_" + self.__theYear,
                            theTarget + "_" + self.__theYear + "_" + self.__group,
                            theA,
-                           flattening,
+                           inverse_flattening,
                            "IAU" + str(self.__theYear),
                            str(gisCode))
             ographic.setPrimem(theLongitudeName, theLongitudePos)
 
-            if theTarget.upper() in ["SUN", "EARTH", "MOON"]:
+            if theTarget.upper() in ["SUN", "EARTH", "MOON"]:  # keep it like that because this is the rule for ographic
                 ographic.setLongitudeAxis(WKT.LongitudeAxis.EAST)
             elif theRotation.upper() == "DIRECT":
                 ographic.setLongitudeAxis(WKT.LongitudeAxis.WEST)
