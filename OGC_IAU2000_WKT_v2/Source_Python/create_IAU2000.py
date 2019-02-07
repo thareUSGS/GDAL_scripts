@@ -28,7 +28,10 @@
 # ---- Added WKT validation
 # ---- Avoided WKT duplication when ocentric CRS has the same signature as ographic CRS
 # ---- Exported PRJ/PROJ for no ellisoid body
-#
+# Feb 2019:
+# ---- Set Primem to Reference_Meridian, 0.0
+# ---- Fixed a bug with subprocess
+# ---- Use semi-minor radius as a sphere for polar projections for ocentric coordinates system
 #
 #  Description: This Python script creates a IAU2000/2009/2015 WKT projection strings for WMS services. prj and
 #               initFile for proj4 can be created
@@ -108,7 +111,7 @@ class WKT:
         The WKT representing a CRS based on longitude/latitude is displayed as follow:
         GEOGCS["<geogcsName>",
            DATUM["<datumName>",
-                SPHEROID["<sphereoidName>",<radius>,<inverseFlattening>]
+                SPHEROID["<sphereoidName>",<radius>,<inverseFlattening>],
                 TOWGS84[0,0,0]
            ],
            PRIMEM["<longitudeName>",<longitudePos>],
@@ -191,6 +194,7 @@ class WKT:
         self.__datumName = datumName
         self.__sphereoidName = sphereoidName
         self.__radius = radius
+        self.__semiMinorRadius = None
         self.__inverseFlattening = inverseFlattening
         self.__authorityName = authorityName
         self.__authorityCode = authorityCode
@@ -242,7 +246,8 @@ class WKT:
                 "False_Northing": 0,
                 "Central_Meridian": 0,
                 "latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         EQUIRECTANGULAR_180 = {  # Equirectangular, clon=180
             "code": 12,
@@ -253,7 +258,8 @@ class WKT:
                 "False_Northing": 0,
                 "Central_Meridian": 180,
                 "Latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         SINUSOIDAL_0 = {  # Sinusoidal, clon=0
             "code": 14,
@@ -263,7 +269,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_Of_Center": 0
-            }
+            },
+            "isPolar": False
         }
         SINUSOIDAL_180 = {  # Sinusoidal, clon=180
             "code": 16,
@@ -273,7 +280,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_Of_Center": 180
-            }
+            },
+            "isPolar": False
         }
         STEREOGRAPHIC_NORTH = {  # North Polar, clon=0
             "code": 18,
@@ -285,7 +293,8 @@ class WKT:
                 "Central_Meridian": 0,
                 "Scale_Factor": 1,
                 "Latitude_Of_Origin": 90
-            }
+            },
+            "isPolar": True
         }
         STEREOGRAPHIC_SOUTH = {  # South Polar, clon=0
             "code": 20,
@@ -297,7 +306,8 @@ class WKT:
                 "Central_Meridian": 0,
                 "Scale_Factor": 1,
                 "Latitude_Of_Origin": -90
-            }
+            },
+            "isPolar": True
         }
         MOLLWEIDE_0 = {  # Mollweide, clon=0
             "code": 22,
@@ -307,7 +317,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Central_Meridian": 0
-            }
+            },
+            "isPolar": False
         }
         MOLLWEIDE_180 = {  # Mollweide, clon=180
             "code": 24,
@@ -317,7 +328,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Central_Meridian": 180
-            }
+            },
+            "isPolar": False
         }
         ROBINSON_0 = {  # Robinson, clon=0
             "code": 26,
@@ -327,7 +339,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_Of_Center": 0
-            }
+            },
+            "isPolar": False
         }
         ROBINSON_180 = {  # Robinson, clon=180
             "code": 28,
@@ -337,7 +350,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_Of_Center": 180
-            }
+            },
+            "isPolar": False
         }
         AUTO_SINUSOIDAL = {  # Auto Sinusoidal
             "code": 60,
@@ -347,7 +361,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_Of_Center": 0
-            }
+            },
+            "isPolar": False
         }
         AUTO_STEREOGRAPHIC = {  # Auto Stereographic, clon=0
             "code": 62,
@@ -359,7 +374,8 @@ class WKT:
                 "Central_Meridian": 0,
                 "Scale_Factor": 1,
                 "Latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         AUTO_TRANSVERSE_MERCATOR = {  # Auto Transverse Mercator
             "code": 64,
@@ -371,7 +387,8 @@ class WKT:
                 "Central_Meridian": 0,
                 "Scale_Factor": 0.9996,
                 "Latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         AUTO_ORTHOGRAPHIC = {  # Auto Orthographic
             "code": 66,
@@ -382,7 +399,8 @@ class WKT:
                 "False_Northing": 0,
                 "Central_Meridian": 0,
                 "Latitude_Of_Origin": 90
-            }
+            },
+            "isPolar": True
         }
         AUTO_EQUIRECTANGULAR = {  # Auto Equidistant_Cylindrical
             "code": 68,
@@ -393,7 +411,8 @@ class WKT:
                 "False_Northing": 0,
                 "Central_Meridian": 180,
                 "Latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         AUTO_LAMBERT_CONFORMAL_CONIC = {  # Auto Lambert_Conformal_Conic
             "code": 70,
@@ -406,7 +425,8 @@ class WKT:
                 "Standard_Parallel_1": -20,
                 "Standard_Parallel_2": 20,
                 "Latitude_Of_Origin": 0
-            }
+            },
+            "isPolar": False
         }
         AUTO_LAMBERT_AZIMUTHAL_EQUAL = {  # Auto Lambert_Azimuthal_Equal_Area
             "code": 72,
@@ -417,7 +437,8 @@ class WKT:
                 "False_Northing": 0,
                 "Longitude_Of_Center": 0,
                 "Latitude_Of_Center": 90
-            }
+            },
+            "isPolar": True
         }
         AUTO_MERCATOR = {  # Auto Mercator
             "code": 74,
@@ -428,7 +449,8 @@ class WKT:
                 "False_Northing": 0,
                 "Central_Meridian": 0,
                 "Scale_Factor": 1
-            }
+            },
+            "isPolar": False
         }
         AUTO_ALBERS = {  # Auto Albers
             "code": 76,
@@ -441,7 +463,8 @@ class WKT:
                 "Standard_Parallel_1": 60.0,
                 "Standard_Parallel_2": 20.0,
                 "Latitude_Of_Center": 40.0
-            }
+            },
+            "isPolar": False
         }
         # # It seems it is OK the next GDAL release : https://github.com/OSGeo/gdal/pull/101
         # # Need to check projection parameters when fixed in GDAL
@@ -463,7 +486,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Central_Meridian": 0.0
-            }
+            },
+            "isPolar": False
         }
         AUTO_ROBINSON = {  # Auto Robinson
             "code": 82,
@@ -473,7 +497,8 @@ class WKT:
                 "False_Easting": 0,
                 "False_Northing": 0,
                 "Longitude_of_center": 0.0
-            }
+            },
+            "isPolar": False
         }
 
     def getGeoGcsName(self):
@@ -629,6 +654,18 @@ class WKT:
 
         logger.debug("Exiting from setPrimem")
 
+    def setSemiMinorAxisForOcentric(self, theC):
+        """
+        One way to approximate ocentric latitudes on an elliptical body is to define the body as a sphere.
+        For equatorial projections we would simply use the semi-major as a sphere and for polar projections we would use
+        the semi-minor radius as a sphere. This is the current method for GDAL to translate a PDS/ISIS3 ocentric
+        elliptical body to say a GeoTiff.
+
+        :param theC: semi-major radius in meter
+        :type theC: float
+        """
+        self.__semiMinorRadius = theC
+
     def setProjection(self, projectionName, projectionEnum, projectionAuthorityName, projectionAuthorityCode):
         """
         Sets the projection
@@ -658,6 +695,8 @@ class WKT:
         self.__projectionName = projectionName
         self.__projectionAuthorityName = projectionAuthorityName
         self.__projectionAutorityCode = projectionAuthorityCode
+        if projectionEnum.value['isPolar'] and self.__semiMinorRadius is not None:
+            self.__radius = self.__semiMinorRadius
 
         logger.debug("Exiting from setProjection")
 
@@ -674,6 +713,8 @@ class WKT:
         self.__projectionAutorityCode = None
 
         logger.debug("Existing from unsetProjection")
+
+
 
     def __getGeoGrs(self):
         """
@@ -808,8 +849,7 @@ class WKT:
 
         try:
             # Call gdalsrsinfo
-            result = subprocess.Popen(['gdalsrsinfo', '-v', wkt], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                      encoding='utf8')
+            result = subprocess.Popen(['gdalsrsinfo', '-v', wkt], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = result.communicate()
             result = "Validate Succeeds" in out
             if result:
@@ -1089,7 +1129,7 @@ class IAUCatalog:
 
         # create an ocentric CRS
         # From IAU, all CRS can be defined as ocentric with the longitude counted positively to East
-        gisCode, ocentric = self.__createOcentricCrs(theNaifNum, theTarget, theA, 0.0, theLongitudeName,
+        gisCode, ocentric = self.__createOcentricCrs(theNaifNum, theTarget, theA, theC, 0.0, theLongitudeName,
                                                      theLongitudePos, theRotation)
         crs.append({
             "target": theTarget,
@@ -1119,14 +1159,19 @@ class IAUCatalog:
         logger.debug("Exiting from __processLine with crs=%s" % crs)
         return crs
 
-    def __createOcentricCrs(self, theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos,
+    def __createOcentricCrs(self, theNaifNum, theTarget, theA, theC, inverse_flattening, theLongitudeName, theLongitudePos,
                             theRotation):
         """
         Creates an ocentric CRS based on longitude/latitude
+        One way to approximate ocentric latitudes on an elliptical body is to define the body as a sphere.
+        For equatorial projections we would simply use the semi-major as a sphere and for polar projections we would use
+        the semi-minor radius as a sphere. This is the current method for GDAL to translate a PDS/ISIS3 ocentric
+        elliptical body to say a GeoTiff.
 
         :param theNaifNum: the Naif Num
         :param theTarget: the target
-        :param theA: the radius in meter
+        :param theA: the semi-major radius in meter
+        :param theC: the semi-minor radius in meter
         :param inverse_flattening: the inverse flattening parameter
         :param theLongitudeName: the longitude name
         :param theLongitudePos: the longitude pos
@@ -1135,6 +1180,8 @@ class IAUCatalog:
         :type theNaifNum: int
         :type theTarget: str
         :type theA: float
+        :type theB: float
+        :type theC: float
         :type inverse_flattening: float
         :type theLongitudeName: str
         :type theLongitudePos: float
@@ -1142,9 +1189,9 @@ class IAUCatalog:
         :rtype: list
         """
 
-        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, "
+        logger.debug("Entering in __createOcentricCrs with theNaifNum=%s, theTarget=%s, theA=%s, theC=%s"
                      "inverse_flattening=%s, theLongitudeName=%s, theLongitudePos=%s, theRotation=%s" % (
-                         theNaifNum, theTarget, theA, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
+                         theNaifNum, theTarget, theA, theC, inverse_flattening, theLongitudeName, theLongitudePos, theRotation
                      ))
 
         # define the IAU code
@@ -1157,12 +1204,10 @@ class IAUCatalog:
                        "IAU" + str(self.__theYear),
                        str(gisCode))
 
-        # set the primem
-        if theRotation is None or theRotation.upper() == "DIRECT":
-            ocentric.setPrimem(theLongitudeName, theLongitudePos)
-        else:
-            # invert the longitude when direction is RETROGRADE because we need to transform it in the DIRECT direction
-            ocentric.setPrimem(theLongitudeName, theLongitudePos * -1)
+        ocentric.setSemiMinorAxisForOcentric(theC)
+
+        # set the primem to Reference_Meridian
+        ocentric.setPrimem()
 
         logger.debug("Exiting from __createOcentricCrs with gisCode=%s ographic=%s" % (gisCode, ocentric.getWkt()))
         return [gisCode, ocentric]
@@ -1209,7 +1254,8 @@ class IAUCatalog:
                            inverse_flattening,
                            "IAU" + str(self.__theYear),
                            str(gisCode))
-            ographic.setPrimem(theLongitudeName, theLongitudePos)
+            # Set primem to Reference Meridian
+            ographic.setPrimem()
 
             if theTarget.upper() in ["SUN", "EARTH", "MOON"]:  # keep it like that because this is the rule for ographic
                 ographic.setLongitudeAxis(WKT.LongitudeAxis.EAST)
@@ -1225,7 +1271,7 @@ class IAUCatalog:
         return [gisCode, ographic]
 
     def __createProjectedCrs(self, theNaifNum, theTarget, ocentric, ographic):
-        """Creates projected Crs for all defined projection
+        """Creates projected Crs for all defined projections
 
         :param theNaifNum: the Naif number
         :param theTarget: the target name
