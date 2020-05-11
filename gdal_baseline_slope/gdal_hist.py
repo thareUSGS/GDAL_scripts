@@ -201,7 +201,8 @@ def main( argv = None ):
                 #print( "  %d buckets from %g to %g:" % ( \
                 #        nBucketCount, dfMin, dfMax ))
                 #print ( "scale: %g, offset: %g" % (scale, offset))
-                increment = round(((dfMax - dfMin) / nBucketCount),2)
+                #increment = round(((dfMax - dfMin) / nBucketCount),2)
+                increment = (dfMax - dfMin) / nBucketCount
                 value = dfMin
                 #get total to normalize (below)
                 for bucket in panHistogram:
