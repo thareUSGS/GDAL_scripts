@@ -55,3 +55,6 @@ target/
 
 # Emacs temp files
 *.*~
+
+# PyCharm
+.idea/
