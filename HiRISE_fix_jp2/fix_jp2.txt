@@ -1,0 +1,27 @@
+Desc: This routine updates Equirectangular projection keywords
+in geoJpeg2000 headers.
+
+routine by Frank Warmerdam
+License: This program is placed in the public domain.
+
+
+Purpose: This program attempts to modify the CenterLatGeoKey tag
+in a GeoTIFF or GeoJP2 image file to be StandardParallel1GeoKey.
+The primarily valuable to fix up GeoJP2's mistakenly generated with
+the incorrect parameters for the Equirectangular projection per:
+http://trac.osgeo.org/gdal/ticket/2706
+
+It just alters a few bytes in the geotiff section of the .jp2 files
+and would not require decompressing and recompressing the jpeg2000 
+imagery. 
+
+Usage:
+fix_jp2 targetfile.jp2
+
+tip to compile:
+g++ -o fix_jp2 fix_jp2.cpp
+
+contact:
+Trent Hare 
+thare@usgs.gov
+
