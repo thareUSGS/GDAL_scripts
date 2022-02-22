@@ -21,5 +21,4 @@ Note fix_jp2.exe has been compiled for Windows and can be used from any commandl
 ### tips to compile (using GCC on most all OSs):
 `g++ -o fix_jp2 fix_jp2.cpp`
 
-more information also here: https://planetarygis.blogspot.com/2016/07/
-more-hirise-conversion-tips-until.html
+more information also here: https://planetarygis.blogspot.com/2016/07/more-hirise-conversion-tips-until.html
