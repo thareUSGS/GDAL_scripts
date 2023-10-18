@@ -18,3 +18,32 @@ Usage: python gdal_baseline_slope.py [-baseline 1,2,5] [-ot Byte] [-crop] infile
        -crop: will trim image 1 to 5 pixels from image edge based on selected baseline amount.
        
        Future: Speed up implementation if possible.
+
+
+Examples for how an a-direction baseline slope is calculated:
+
+For a baseline = 2:
+ 
+        #Uses a 3x3 pixel block, but only the 4 corners are used in thed calculation
+        #which is why a dummy "z" variable is present
+        [a, z, b,
+         z, z, z,
+         c, z, d] = in_filter
+
+        dz_dx = ((b + d) - (a + c)) / (baseline * float(x_cellsize))
+        dz_dy = ((a + b) - (c + d)) / (baseline * float(y_cellsize))
+        slope = np.sqrt(dz_dx**2 + dz_dy**2)
+        return np.degrees(np.arctan(slope)) #return slope in degrees rather than radians
+
+For a baseline = 5:
+
+        #Uses a 6x6 pixel block, but again only the 4 corners are used in the calculation
+        #which is why a dummy "z" variable is present
+        [ a,  z,  z,  z,  z,  b, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          z,  z,  z,  z,  z,  z, 
+          c,  z,  z,  z,  z,  d] = in_filter
+
+          same equation used above, where baseline variable = 5 here.
