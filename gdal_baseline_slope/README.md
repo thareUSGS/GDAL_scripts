@@ -24,8 +24,8 @@ Examples for how an a-direction baseline slope is calculated:
 
 For a baseline = 2:
  
-        #Uses a 3x3 pixel block, but only the 4 corners are used in the calculation
-        #which is why a dummy "z" variable is present
+        #Uses a moving 3x3 pixel window, but only the 4 corners are used in the calculation
+        #ignoring all the internal "z" pixels
         [a, z, b,
          z, z, z,
          c, z, d] = in_filter
@@ -37,7 +37,7 @@ For a baseline = 2:
 
 For a baseline = 5:
 
-        #Uses a 6x6 pixel block, but again only the 4 corners are used in the calculation
+        #Uses a moving 6x6 pixel window, but again only the 4 corners are used in the calculation
         #ignoring all the internal "z" pixels
         [ a,  z,  z,  z,  z,  b, 
           z,  z,  z,  z,  z,  z, 
