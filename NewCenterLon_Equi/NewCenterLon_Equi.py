@@ -36,6 +36,7 @@ try:
     from osgeo import osr
     from osgeo.gdalconst import *
     gdal.TermProgress = gdal.TermProgress_nocb
+    gdal.DontUseExceptions()
 except ImportError:
     import gdal
     from gdalconst import *
@@ -56,30 +57,30 @@ def Usage():
 # =============================================================================
 # convert string to GDAL Type enumeration
 def ParseType(type):
-    if type == 'Byte':
-	return GDT_Byte
-    elif type == 'Int16':
-	return GDT_Int16
-    elif type == 'UInt16':
-	return GDT_UInt16
-    elif type == 'Int32':
-	return GDT_Int32
-    elif type == 'UInt32':
-	return GDT_UInt32
-    elif type == 'Float32':
-	return GDT_Float32
-    elif type == 'Float64':
-	return GDT_Float64
-    elif type == 'CInt16':
-	return GDT_CInt16
-    elif type == 'CInt32':
-	return GDT_CInt32
-    elif type == 'CFloat32':
-	return GDT_CFloat32
-    elif type == 'CFloat64':
-	return GDT_CFloat64
+    if (type == 'Byte'):
+        return GDT_Byte
+    elif (type == 'Int16'):
+        return GDT_Int16
+    elif (type == 'UInt16'):
+        return GDT_UInt16
+    elif (type == 'Int32'):
+        return GDT_Int32
+    elif (type == 'UInt32'):
+        return GDT_UInt32
+    elif (type == 'Float32'):
+        return GDT_Float32
+    elif (type == 'Float64'):
+        return GDT_Float64
+    elif (type == 'CInt16'):
+        return GDT_CInt16
+    elif (type == 'CInt32'):
+        return GDT_CInt32
+    elif (type == 'CFloat32'):
+        return GDT_CFloat32
+    elif (type == 'CFloat64'):
+        return GDT_CFloat64
     else:
-	return GDT_Byte
+        return GDT_Byte
 # =============================================================================
 
 #set None for commandline options
@@ -121,7 +122,7 @@ if outfile is None:
 # Ensure we recognise the driver.
 out_driver = gdal.GetDriverByName(format)
 if out_driver is None:
-    print '"%s" driver not registered.' % format
+    print ('"%s" driver not registered.' % format)
     sys.exit(1)
     
 # Open input dataset
