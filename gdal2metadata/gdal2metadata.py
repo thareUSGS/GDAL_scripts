@@ -40,6 +40,7 @@ from time import strftime
 try:
     from osgeo import gdal
     from osgeo import osr
+    gdal.DontUseExceptions()
 except:
     import gdal
     import osr
@@ -86,6 +87,11 @@ def Usage(theApp):
 def EQUAL(a, b):
     return a.lower() == b.lower()
 
+def recursive_search(element, tag_to_search, replacement_value):
+    if element.tag == tag_to_search:
+        element.text = replacement_value
+    for child in element: 
+        recursive_search(child, tag_to_search, replacement_value)
 
 #/************************************************************************/
 #/*                                main()                                */
@@ -197,11 +203,15 @@ def main( argv = None ):
     parser = etree.XMLParser(remove_blank_text=True)
     tree = etree.parse(template_xml, parser)
 
-    for lworkcit in tree.getiterator('lworkcit'):
-        for citeinfo in lworkcit.getiterator('citeinfo'):
+#    root = tree.getroot()
+#    recursive_search(root, 'title', pszFilename)   
+
+
+    for citation in tree.iter('citation'):
+        for citeinfo in citation.iter('citeinfo'):
             title = citeinfo.find('title')
             if title is None:        
-                title = etree.SubElement(citeinfo, 'title')
+               title = etree.SubElement(citeinfo, 'title')
             title.text = pszFilename
 
 #/* -------------------------------------------------------------------- */
@@ -239,7 +249,8 @@ def main( argv = None ):
             #print( "Coordinate System is:\n%s" % pszPrettyWkt )
             mapProjection = "None"
             #Extract projection information
-            target = hSRS.GetAttrValue("DATUM",0).replace("D_","").replace("_2000","")
+            targetD = hSRS.GetAttrValue("DATUM",0).replace("_2000","").replace("_localRadius","").title()
+            target = targetD.replace("D_","").title()
             semiMajor = hSRS.GetSemiMajor() #/ 1000.0
             semiMinor = hSRS.GetSemiMinor() #/ 1000.0
             invFlat = hSRS.GetInvFlattening()
@@ -254,14 +265,14 @@ def main( argv = None ):
             if (pszProjection[0:6] == "PROJCS"):
                 mapProjection = hSRS.GetAttrValue("PROJECTION",0)
 
-                for horizsys in tree.getiterator('horizsys'):
-                    horizsys.clear()
+                for horizsys in tree.iter('horizsys'):
+                    #horizsys.clear()
                     planar = etree.SubElement(horizsys, 'planar')
                     mapproj = etree.SubElement(planar, 'mapproj')
                     mapprojn = etree.SubElement(mapproj, 'mapprojn')
 
                 if EQUAL(mapProjection,"Equirectangular"):
-                    #for mapprojn in tree.getiterator('mapprojn'):
+                    #for mapprojn in tree.iter('mapprojn'):
                     mapprojn.text = "Equirectangular"
                     centLat = None
                     centLat = hSRS.GetProjParm('standard_parallel_1')
@@ -269,22 +280,22 @@ def main( argv = None ):
                         centLat = hSRS.GetProjParm('latitude_of_origin')
                     centLon = hSRS.GetProjParm('central_meridian')
                     equirect = etree.SubElement(mapproj, 'equirect')
-                    #for equirect in tree.getiterator('equirect'):
+                    #for equirect in tree.iter('equirect'):
                     stdparll = etree.SubElement(equirect, 'stdparll')
-                    #for stdparll in equirect.getiterator('stdparll'):
+                    #for stdparll in equirect.iter('stdparll'):
                     stdparll.text = str(centLat)
-                    #for longcm in equirect.getiterator('longcm'):
+                    #for longcm in equirect.iter('longcm'):
                     longcm = etree.SubElement(equirect, 'longcm')
                     longcm.text = str(centLon)
-                    #for feast in equirect.getiterator('feast'):
+                    #for feast in equirect.iter('feast'):
                     feast = etree.SubElement(equirect, 'feast')
                     feast.text = str(hSRS.GetProjParm('false_easting'))
-                    #for fnorth in equirect.getiterator('fnorth'):
+                    #for fnorth in equirect.iter('fnorth'):
                     fnorth = etree.SubElement(equirect, 'fnorth')
                     fnorth.text = str(hSRS.GetProjParm('false_northing'))
                             
                 if EQUAL(mapProjection,"Mercator"):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Mercator"
                     centLat = None
                     centLat = hSRS.GetProjParm('latitude_of_origin')
@@ -292,112 +303,112 @@ def main( argv = None ):
                         centLat = hSRS.GetProjParm('standard_parallel_1')
                     centLon = hSRS.GetProjParm('central_meridian')
                     scale = hSRS.GetProjParm('scale_factor')
-                    for merc in tree.getiterator('transmer'):
-                        for stdparll in merc.getiterator('stdparll'):
+                    for merc in tree.iter('transmer'):
+                        for stdparll in merc.iter('stdparll'):
                             stdparll.text = str(centLat)
-                        for longcm in merc.getiterator('longcm'):
+                        for longcm in merc.iter('longcm'):
                             longcm.text = str(centLon)
-                        for sfequat in merc.getiterator('sfequat'):
+                        for sfequat in merc.iter('sfequat'):
                             sfequat.text = str(scale)
-                        for feast in merc.getiterator('feast'):
+                        for feast in merc.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in merc.getiterator('fnorth'):
+                        for fnorth in merc.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
                 
                 if EQUAL(mapProjection,"Orthographic "):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Orthographic"
                     centLat = hSRS.GetProjParm('latitude_of_origin ')
                     centLon = hSRS.GetProjParm('central_meridian')
-                    for orthogr in tree.getiterator('orthogr'):
-                        for stdparll in orthogr.getiterator('stdparll'):
+                    for orthogr in tree.iter('orthogr'):
+                        for stdparll in orthogr.iter('stdparll'):
                             stdparll.text = str(centLat)
-                        for longcm in orthogr.getiterator('longcm'):
+                        for longcm in orthogr.iter('longcm'):
                             longcm.text = str(centLon)
-                        for feast in orthogr.getiterator('feast'):
+                        for feast in orthogr.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in orthogr.getiterator('fnorth'):
+                        for fnorth in orthogr.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
                 if EQUAL(mapProjection,"Stereographic"):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Stereographic"
                     centLat = hSRS.GetProjParm('latitude_of_origin')
                     centLon = hSRS.GetProjParm('central_meridian')
-                    for stereo in tree.getiterator('stereo'):
-                        for latprjc in stereo.getiterator('latprjc'):
+                    for stereo in tree.iter('stereo'):
+                        for latprjc in stereo.iter('latprjc'):
                             latprjc.text = str(centLat)
-                        for longpc in stereo.getiterator('longpc'):
+                        for longpc in stereo.iter('longpc'):
                             longpc.text = str(centLon)
-                        for feast in stereo.getiterator('feast'):
+                        for feast in stereo.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in stereo.getiterator('fnorth'):
+                        for fnorth in stereo.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
                 if EQUAL(mapProjection,"Sinusoidal"):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Sinusoidal"
                     centLon = None
                     centLon = hSRS.GetProjParm('longitude_of_center')
                     if centLon == None:
                         centLon = hSRS.GetProjParm('central_meridian')
-                    for sinusoid in tree.getiterator('sinusoid'):
-                        for longcm in sinusoid.getiterator('longcm'):
+                    for sinusoid in tree.iter('sinusoid'):
+                        for longcm in sinusoid.iter('longcm'):
                             longcm.text = str(centLon)
-                        for feast in sinusoid.getiterator('feast'):
+                        for feast in sinusoid.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in sinusoid.getiterator('fnorth'):
+                        for fnorth in sinusoid.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
                 if EQUAL(mapProjection,"Robinson"):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Robinson"
                     centLon = None
                     centLon = hSRS.GetProjParm('longitude_of_center')
                     if centLon == None:
                         centLon = hSRS.GetProjParm('central_meridian')
-                    for robinson in tree.getiterator('robinson'):
-                        for longpc in robinson.getiterator('longpc'):
+                    for robinson in tree.iter('robinson'):
+                        for longpc in robinson.iter('longpc'):
                             longpc.text = str(centLon)
-                        for feast in robinson.getiterator('feast'):
+                        for feast in robinson.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in robinson.getiterator('fnorth'):
+                        for fnorth in robinson.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
                 if (EQUAL(mapProjection,"Polar_Stereographic") or EQUAL(mapProjection,"Stereographic_North_Pole") or EQUAL(mapProjection,"Stereographic_South_Pole")):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Polar Stereographic"
                     centLat = hSRS.GetProjParm('latitude_of_origin')
                     centLon = hSRS.GetProjParm('central_meridian')
                     scale = hSRS.GetProjParm('scale_factor')
-                    for polarst in tree.getiterator('polarst'):
-                        for stdparll in polarst.getiterator('stdparll'):
+                    for polarst in tree.iter('polarst'):
+                        for stdparll in polarst.iter('stdparll'):
                             stdparll.text = str(centLat)
-                        for svlong in polarst.getiterator('svlong'):
+                        for svlong in polarst.iter('svlong'):
                             svlong.text = str(centLon)
-                        for sfprjorg in polarst.getiterator('sfprjorg'):
+                        for sfprjorg in polarst.iter('sfprjorg'):
                             sfprjorg.text = str(scale)
-                        for feast in polarst.getiterator('feast'):
+                        for feast in polarst.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in polarst.getiterator('fnorth'):
+                        for fnorth in polarst.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
 
                 if EQUAL(mapProjection,"Transverse_Mercator"):
-                    for mapprojn in tree.getiterator('mapprojn'):
+                    for mapprojn in tree.iter('mapprojn'):
                         mapprojn.text = "Transverse Mercator"
                     centLat = hSRS.GetProjParm('latitude_of_origin')
                     centLon = hSRS.GetProjParm('central_meridian')
                     scale = hSRS.GetProjParm('scale_factor')
-                    for transmer in tree.getiterator('transmer'):
-                        for latprjo in transmer.getiterator('latprjo'):
+                    for transmer in tree.iter('transmer'):
+                        for latprjo in transmer.iter('latprjo'):
                             latprjo.text = str(centLat)
-                        for longcm in transmer.getiterator('longcm'):
+                        for longcm in transmer.iter('longcm'):
                             longcm.text = str(centLon)
-                        for sfctrmer in transmer.getiterator('sfctrmer'):
+                        for sfctrmer in transmer.iter('sfctrmer'):
                             sfctrmer.text = str(scale)
-                        for feast in transmer.getiterator('feast'):
+                        for feast in transmer.iter('feast'):
                             feast.text = str(hSRS.GetProjParm('false_easting'))
-                        for fnorth in transmer.getiterator('fnorth'):
+                        for fnorth in transmer.iter('fnorth'):
                             fnorth.text = str(hSRS.GetProjParm('false_northing'))
                 
 
@@ -929,7 +940,7 @@ def main( argv = None ):
 #/************************************************************************/
 #/*                      WriteXML bits to FGDC template                  */
 #/************************************************************************/
-    for rasttype in tree.getiterator('rasttype'):
+    for rasttype in tree.iter('rasttype'):
         rasttype.text = "Pixel"
     #~ instrList = pszFilename.split("_")
     hBand = hDataset.GetRasterBand( 1 )
@@ -981,7 +992,9 @@ def main( argv = None ):
     #~ f.write('INSTRUMENT_NAME           = "%s"\n' % instrList[1])
     #~ f.write('INSTRUMENT_ID             = "%s"\n' % instrList[1])
     #~ f.write('TARGET_NAME               = MOON\n')
-    for ellips in tree.getiterator('ellips'):
+    for horizdn in tree.iter('horizdn'):
+        horizdn.text = targetD
+    for ellips in tree.iter('ellips'):
         ellips.text = target
     #~ f.write('MISSION_PHASE_NAME        = "POST MISSION"\n')
     #~ f.write('RATIONALE_DESC            = "Created at the request of NASA\'s Exploration\n')
@@ -1002,12 +1015,12 @@ def main( argv = None ):
     #~ f.write('    MAP_PROJECTION_TYPE          = \"%s\"\n' % mapProjection)
     #~ f.write('    PROJECTION_LATITUDE_TYPE     = PLANETOCENTRIC\n')
     #~ f.write('    A_AXIS_RADIUS                = %.1f <KM>\n' % semiMajor)
-    for semiaxis in tree.getiterator('semiaxis'):
+    for semiaxis in tree.iter('semiaxis'):
         semiaxis.text = str(semiMajor)
     #~ f.write('    B_AXIS_RADIUS                = %.1f <KM>\n' % semiMajor)
     #~ f.write('    C_AXIS_RADIUS                = %.1f <KM>\n' % semiMinor)
-    for denflat in tree.getiterator('denflat'):
-        denflat.text = str(invFlat)
+    for denflat in tree.iter('denflat'):
+        denflat.text = "{:.2e}".format(invFlat)
     #~ f.write('    COORDINATE_SYSTEM_NAME       = PLANETOCENTRIC\n')
     #~ f.write('    POSITIVE_LONGITUDE_DIRECTION = EAST\n')
     #~ f.write('    KEYWORD_LATITUDE_TYPE        = PLANETOCENTRIC\n')
@@ -1023,36 +1036,36 @@ def main( argv = None ):
     #~ f.write('    MAP_PROJECTION_ROTATION      = 0.0 <DEG>\n')
     #~ f.write('    MAP_RESOLUTION               = %.4f <PIX/DEG>\n' % mapres )
     if (pszProjection[0:6] == "GEOGCS"):
-        for latSize in tree.getiterator('latres'):
-            latSize.text = str(latres)
+        for latSize in tree.iter('latres'):
+            latSize.text = "{:.6f}".format(latres)
             if debug:
                print('Lat resolution: %s' %(latSize.text))
-        for lonSize in tree.getiterator('lonres'):
-            lonSize.text = str(lonres)
-        for geogunit in tree.getiterator('geogunit'):
+        for lonSize in tree.iter('lonres'):
+            lonSize.text =  "{:.6f}".format(lonres)
+        for geogunit in tree.iter('geogunit'):
             geogunit.text = "Decimal degrees"
     #~ f.write('    MAP_SCALE                    = %.8f <KM/PIXEL>\n' % kmres )
     else:
-        for absres in tree.getiterator('absres'): # in meters
-            absres.text = str(xres)
+        for absres in tree.iter('absres'): # in meters
+            absres.text = "{:.6f}".format(xres)
             if debug:
                print('X resolution: %s' %(absres.text))
-        for ordres in tree.getiterator('ordres'):
-            ordres.text = str(abs(yres))
-        for plandu in tree.getiterator('plandu'):
+        for ordres in tree.iter('ordres'):
+            ordres.text = "{:.6f}".format(yres * -1)
+        for plandu in tree.iter('plandu'):
             plandu.text = "meters"
     #~ f.write('    MINIMUM_LATITUDE             = %.8f <DEGREE>\n' % lry)
-    for southbc in tree.getiterator('southbc'):
-        southbc.text = str(lry)
+    for southbc in tree.iter('southbc'):
+        southbc.text = "{:.4f}".format(lry)
     #~ f.write('    MAXIMUM_LATITUDE             = %.8f <DEGREE>\n' % uly)
-    for northbc in tree.getiterator('northbc'):
-        northbc.text = str(uly)
+    for northbc in tree.iter('northbc'):
+        northbc.text = "{:.4f}".format(uly)
     #~ f.write('    WESTERNMOST_LONGITUDE        = %.8f <DEGREE>\n' % ulx)
-    for westbc in tree.getiterator('westbc'):
-        westbc.text = str(ulx)
+    for westbc in tree.iter('westbc'):
+        westbc.text = "{:.4f}".format(ulx)
     #~ f.write('    EASTERNMOST_LONGITUDE        = %.8f <DEGREE>\n' % lrx)
-    for eastbc in tree.getiterator('eastbc'):
-        eastbc.text = str(lrx)
+    for eastbc in tree.iter('eastbc'):
+        eastbc.text = "{:.4f}".format(lrx)
     #~ f.write('    LINE_PROJECTION_OFFSET       = %.1f\n' % ( (ulx / kmres * 1000 ) - 0.5 ))
     #~ f.write('    SAMPLE_PROJECTION_OFFSET     = %.1f\n' % ( (uly / kmres * 1000 ) + 0.5 ))
     #~ f.write('END_OBJECT = IMAGE_MAP_PROJECTION\n')
@@ -1063,11 +1076,11 @@ def main( argv = None ):
     #~ f.write('                                 see filename for data type."\n')
     #~ #f.write('\n')
     #~ f.write('    LINES                      = %d\n' % hDataset.RasterYSize)
-    for rowcount in tree.getiterator('rowcount'):
+    for rowcount in tree.iter('rowcount'):
         rowcount.text = str(hDataset.RasterYSize)
     #~ f.write('    LINE_SAMPLES               = %d\n' % hDataset.RasterXSize)
-    for colcount in tree.getiterator('colcount'):
-        colcount.text = str(hDataset.RasterYSize)
+    for colcount in tree.iter('colcount'):
+        colcount.text = str(hDataset.RasterXSize)
     #~ f.write('    UNIT                       = METER\n')
     #~ f.write('    OFFSET                     = %.10g\n' % ( hBand.GetOffset() ))
     #~ f.write('    SCALING_FACTOR             = %.10g\n' % ( hBand.GetScale() ))
@@ -1076,7 +1089,7 @@ def main( argv = None ):
     #~ f.write('    SAMPLE_BIT_MASK            = %s\n' % (sample_mask) )
     #~ #f.write('\n')
     #~ f.write('    BANDS                      = %d\n' % hDataset.RasterCount)
-    for vrtcount in tree.getiterator('vrtcount'):
+    for vrtcount in tree.iter('vrtcount'):
         vrtcount.text = str(hDataset.RasterCount)
     #~ #f.write('\n')
     #~ f.write('    BAND_STORAGE_TYPE          = BAND_SEQUENTIAL\n')
@@ -1101,9 +1114,9 @@ def main( argv = None ):
     #~ f.write('END_OBJECT = IMAGE\n')
     #~ f.write('END\n')
     #~ f.close()
-    for metstdn in tree.getiterator('metstdn'):
+    for metstdn in tree.iter('metstdn'):
         metstdn.text = "FGDC Content Standards for Digital Geospatial Metadata"
-    for metstdv in tree.getiterator('metstdv'):
+    for metstdv in tree.iter('metstdv'):
         metstdv.text = "FGDC-STD-001-1998"
 
 #/* ==================================================================== */

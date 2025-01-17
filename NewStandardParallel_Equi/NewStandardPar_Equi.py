@@ -38,6 +38,7 @@ try:
     from osgeo.gdalconst import *
 
     gdal.TermProgress = gdal.TermProgress_nocb
+    gdal.DontUseExceptions()
 except ImportError:
     import gdal
     from gdalconst import *
@@ -180,7 +181,7 @@ newGeomatrix = (
 # Report results
 print("To standard_parallel_1: %f" % (newClat))
 print("Original X: %f\tShifted X: %f" % (minx, newminx))
-print("Original Y cellsize (will be unchanged): %f" % (cellsizey))
+print("Original Y cellsize (will be unchanged): %f" % (-cellsizey))
 print("Original X cellsize: %f\tNew X cellsize: %f" % (cellsizex, newcellsizex))
 
 # Get the raster type - Byte, Uint16, Float32, ...
