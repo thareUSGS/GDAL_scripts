@@ -22,5 +22,5 @@ https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map
 - ZIP shapefile:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POINT&REQUEST=getfeature&BBOX=10,5,65,25&OUTPUTFORMAT=SHAPEZIP 
 ---
-CSV:
+- CSV:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POINT&REQUEST=getfeature&BBOX=10,5,65,25&OUTPUTFORMAT=CSV
