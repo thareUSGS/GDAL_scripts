@@ -2,13 +2,15 @@
 _use at your own risk_
 ---
 - listing from from: https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html
--example getcapabilities:
+
+### Mars Examples
+- getcapabilities:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&REQUEST=getcapabilities
 ---
-- QGIS: https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map
-- points:
+- form QGIS: https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map
+- GML points:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POINT&REQUEST=getfeature&BBOX=10,5,65,25
-- polys (_could have wrapping issues_):
+- GML polys (_could have wrapping issues_):
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POLY&REQUEST=getfeature&BBOX=50,5,65,15
 ---
 - GeoJSON: https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POINT&REQUEST=getfeature&OUTPUTFORMAT=geojson
