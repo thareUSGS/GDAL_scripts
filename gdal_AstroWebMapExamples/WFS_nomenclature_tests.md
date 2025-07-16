@@ -1,7 +1,7 @@
 ## WFS API (Mapserver) Examples for USGS IAU Nomenclature PostgreSQL/PostGIS database 
 _Not officially supported. Use at your own risk_
 
-Note: for compatiblity with mapping interfaces, all planetary WFS layers are tagged in degrees but using an Earth definition (EPSG:4326, WGS84). FOr more WFS examples uses: https://webgis.pub/mapserver-wfs-intro.html
+> Note: for compatiblity with mapping interfaces, all planetary WFS layers are tagged in degrees but using an Earth definition (EPSG:4326, WGS84). For more WFS examples uses: https://webgis.pub/mapserver-wfs-intro.html
 ---
 - listing from from: https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html
 
