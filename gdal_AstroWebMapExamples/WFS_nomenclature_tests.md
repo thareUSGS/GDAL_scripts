@@ -1,15 +1,15 @@
-## WFS API (Mapserver) for USGS IAU Nomenclature PostgreSQL/PostGIS database 
+## WFS API (Mapserver) Examples for USGS IAU Nomenclature PostgreSQL/PostGIS database 
 _Not officially supported. Use at your own risk_
 
-Note: for compatiblity with mapping interfaces, all planetary WFS layers are tagged in degrees but using an Earth definition (EPSG:4326, WGS84)! 
+Note: for compatiblity with mapping interfaces, all planetary WFS layers are tagged in degrees but using an Earth definition (EPSG:4326, WGS84). FOr more WFS examples uses: https://webgis.pub/mapserver-wfs-intro.html
 ---
 - listing from from: https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html
 
-### Mars Examples
+### <ins>Mars Examples</ins>
 - getcapabilities:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&REQUEST=getcapabilities
 ---
-- form QGIS: https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map
+- for QGIS: https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map
 - GML points:
 https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_nomen_wfs.map&service=WFS&version=1.1.0&TYPENAME=ms:MARS_POINT&REQUEST=getfeature&BBOX=10,5,65,25
 <!-- - GML polys (_could have wrapping issues_):
