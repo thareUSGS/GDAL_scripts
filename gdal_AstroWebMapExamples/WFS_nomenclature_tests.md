@@ -1,5 +1,6 @@
 ## Not well tested API using Mapserver's WFS for IAU Nomenclature.
 _use at your own risk_
+Note: for compatiblity with mapping interfaces, all planetary WFS layers are tagged in degrees but using an Earth definition (EPSG:4326, WGS84)! 
 ---
 - listing from from: https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html
 
