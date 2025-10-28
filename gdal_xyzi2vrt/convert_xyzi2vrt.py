@@ -1,4 +1,4 @@
-// convert_xyzi_to_vrt.py
+// convert_xyzi2vrt.py
 //
 // Purpose: Create a *.csv and GDAL *.vrt for LOLA xyzi binary formatted files produced by Goddard.
 // XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument. Example files
@@ -57,7 +57,7 @@ def convert_binary_to_csv_and_vrt(input_file):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python binary_to_csv_vrt.py <input_binary_file>")
+        print("Usage: python convert_xyzi2vrt.py <input_binary_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]

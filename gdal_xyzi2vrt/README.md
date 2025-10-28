@@ -1,4 +1,4 @@
-convert_xyzi_to_vrt.py
+convert_xyzi2vrt.py
 
 Purpose: Create a *.csv and GDAL *.vrt for LOLA xyzi binary formatted files produced by Goddard.
 XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument. Example files
@@ -10,8 +10,8 @@ version: 0.1
 
 Created with tips from CoPilot AI.
 
-Usage: `python convert_xyzi_to_vrt.py in.tif` 
-*  output will be a in.csv and in.vrt files
+Usage: `python convert_xyzi2vrt.py Site01_final_adj.xyzi` 
+*  output will be a Site01_final_adj.csv and Site01_final_adj.vrt files
 
 Environment:
 installed miniforge, with gdal (conda install gdal).
