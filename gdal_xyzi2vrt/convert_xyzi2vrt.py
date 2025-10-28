@@ -1,13 +1,13 @@
-// convert_xyzi2vrt.py
-//
-// Purpose: Create a *.csv and GDAL *.vrt for LOLA xyzi binary formatted files produced by Goddard.
-// XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument. Example files
-// can be found at https://pgda.gsfc.nasa.gov/products/78
-// 
-// Author:  Trent Hare, <trent.m.hare@gmail.com>
-// Date:    Oct 27, 2025
-// version: 0.1
-// License: CC0 (public domain)
+# convert_xyzi2vrt.py
+#
+# Purpose: Create a *.csv and GDAL *.vrt for LOLA xyzi binary formatted files produced by Goddard.
+# XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument. Example files
+# can be found at https://pgda.gsfc.nasa.gov/products/78
+# 
+# Author:  Trent Hare, <trent.m.hare@gmail.com>
+# Date:    Oct 27, 2025
+# version: 0.1
+# License: CC0 (public domain)
 
 import struct
 import csv
