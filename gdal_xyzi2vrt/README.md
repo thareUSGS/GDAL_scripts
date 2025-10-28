@@ -2,7 +2,8 @@ convert_xyzi2vrt.py
 
 Purpose: Create a *.csv and GDAL *.vrt for LOLA xyzi binary formatted files produced by Goddard.
 XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument. Example files
-can be found at https://pgda.gsfc.nasa.gov/products/78
+can be found at https://pgda.gsfc.nasa.gov/products/78. GDAL VRT files can be used within GDAL
+tools (e.g., ogrinfo or ogr2ogr) or directly in applications like QGIS.
 
 Author:  Trent Hare, <trent.m.hare@gmail.com>
 Date:    Oct 27, 2025
