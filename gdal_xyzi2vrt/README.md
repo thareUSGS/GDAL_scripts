@@ -5,6 +5,8 @@ XYZI files are Lunar based X,Y,Z,date lidar shot points from the LOLA instrument
 can be found at https://pgda.gsfc.nasa.gov/products/78. GDAL VRT files can be used within GDAL
 tools (e.g., ogrinfo or ogr2ogr) or directly in applications like QGIS.
 
+**Note this is currently hardwired to the files on the site linked above, which is a lunar South Pole Stereographic map projection (IAU_2015:30135).**
+
 Author:  Trent Hare, <trent.m.hare@gmail.com>
 Date:    Oct 27, 2025
 version: 0.1
