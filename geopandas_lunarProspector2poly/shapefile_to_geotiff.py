@@ -28,12 +28,16 @@ def shapefile_to_geotiff(shapefile, output_tiff, pixel_size=0.5, attribute="H_pp
     x_res = int((x_max - x_min) / pixel_size)
     y_res = int((y_max - y_min) / pixel_size)
 
-    # Create GeoTIFF
-    target_ds = gdal.GetDriverByName('GTiff').Create(output_tiff, x_res, y_res, 1, gdal.GDT_Float32)
-    target_ds.SetGeoTransform((x_min, pixel_size, 0, y_max, 0, -pixel_size))
 
-    # Set projection from shapefile CRS
+    # Create GeoTIFF with LZW compression
+    options = ["COMPRESS=LZW", "TILED=YES"]
+    target_ds = gdal.GetDriverByName('GTiff').Create(output_tiff, x_res, y_res, 1, gdal.GDT_Float32, options)
+    target_ds.SetGeoTransform((x_min, pixel_size, 0, y_max, 0, -pixel_size))
     target_ds.SetProjection(source_srs.ExportToWkt())
+
+    # Set NoData value
+    band = target_ds.GetRasterBand(1)
+    band.SetNoDataValue(-32768)
 
     # Rasterize using attribute field
     gdal.RasterizeLayer(target_ds, [1], source_layer, options=[f"ATTRIBUTE={attribute}"])
