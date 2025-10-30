@@ -25,6 +25,7 @@ installed miniforge, with gdal and geopandas (conda install gdal geopandas).
 
 Data used:
 https://pds-geosciences.wustl.edu/missions/lunarp/reduced/hydrogenhd.txt
+```
 #
 # Hydrogen data as described by Feldman et al., JGR, in press, 2001
 #
@@ -44,4 +45,5 @@ https://pds-geosciences.wustl.edu/missions/lunarp/reduced/hydrogenhd.txt
   -90.00,    -89.50,   -178.50,   -178.00,      147.47
   -90.00,    -89.50,   -178.00,   -177.50,      147.46
   -90.00,    -89.50,   -177.50,   -177.00,      147.45
-...
+…
+```
