@@ -90,7 +90,7 @@ if  outfile is None:
     Usage()
 if gores is None:
     gores = 8
-    print "Warning: Number of gores defaulting to 8, send -nd VALUE to set a different value."
+    print("Warning: Number of gores defaulting to 8, send -nd VALUE to set a different value.")
     
 #Try to open input image
 in_dataset = gdal.Open( infile, GA_ReadOnly )
@@ -105,7 +105,7 @@ outdataset = out_driver.Create(outfile, in_dataset.RasterXSize, \
              in_dataset.RasterYSize, in_dataset.RasterCount, type)
 
 #gore parameters
-goreWidth = in_dataset.RasterXSize/(gores);
+goreWidth = in_dataset.RasterXSize // gores;
 
 #loop over bands -- probably can handle all bands at once...
 for band in range (1, in_dataset.RasterCount + 1):
