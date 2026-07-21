@@ -1,3 +1,23 @@
+**WARNING**
+    This site has conflicting information with the final IAU 2015 release. Please visit: https://github.com/pdssp/csvforwkt
+
+Current abstract: https://www.hou.usra.edu/meetings/lpsc2025/pdf/1659.pdf
+
+IAU:2015 CRS Web Registry Service: https://voparis-vespa-crs.obspm.fr/
+Example 49900: https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49900 
+49910: https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49910 
+49915: https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49915 
+49930: https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49930 
+49935: https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49935
+>  gdalsrsinfo "https://voparis-vespa-crs.obspm.fr/ws/wkts/IAU:2015:49915"
+
+PROJ has these codes also:
+>  gdalsrsinfo IAU_2015:49915
+https://spatialreference.org/
+https://crs-explorer.proj.org/
+
+-------------
+
 **Description:**
     IAU2000_v2.wkt is a tabular Well Known Text (WKT) representation of the
     IAU2000 coded coordinate reference systems (CRS) for planetary bodies
