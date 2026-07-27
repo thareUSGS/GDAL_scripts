@@ -48,4 +48,11 @@ For a baseline = 5:
 
           same equation used above, where baseline variable = 5 here.
 
-for more see on sptial filters: https://doi-usgs.github.io/ISIS3/The_Power_of_Spatial_Filters.html
+For a baseline = 1:
+
+        [a, b,
+         c, d] = in_filter
+
+          same equation used above, where baseline variable = 1 here.
+
+for more see on spatial filters: https://doi-usgs.github.io/ISIS3/The_Power_of_Spatial_Filters.html
